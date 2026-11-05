@@ -34,6 +34,16 @@ for (const s of [prev, cur]) for (const l of ['E0','SP1','F1','I1','D1','B1','T1
   await get(`https://www.football-data.co.uk/mmz4281/${s}/${l}.csv`, dest);
   const t = read(dest); if (t) files[`${s}_${l}`] = t;
 }
+// 2e divisions (pour les équipes promues) : on ne garde que les colonnes utiles
+for (const s of [prev, cur]) for (const l of ['E1','D2','I2','SP2','F2','SC1']) {
+  const dest = path.join(RAW, `${s}_${l}.csv`);
+  await get(`https://www.football-data.co.uk/mmz4281/${s}/${l}.csv`, dest);
+  const t = read(dest); if (!t) continue;
+  const lines = t.replace(/^\uFEFF/, '').split(/\r?\n/).filter(x => x.trim());
+  const head = lines[0].split(','), idx = ['Date','HomeTeam','AwayTeam','FTHG','FTAG'].map(c => head.indexOf(c));
+  if (idx.includes(-1)) continue;
+  files[`${s}_${l}`] = lines.map(x => { const p = x.split(','); return idx.map(i => p[i]).join(','); }).join('\n');
+}
 for (const l of ['AUT','DNK','FIN','NOR','POL','SWZ','ROU','SWE','IRL']) {
   const dest = path.join(RAW, `new_${l}.csv`);
   await get(`https://www.football-data.co.uk/new/${l}.csv`, dest);
