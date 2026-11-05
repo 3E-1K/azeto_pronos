@@ -25,7 +25,7 @@ const read = f => fs.existsSync(f) ? fs.readFileSync(f, 'utf8') : null;
 const now = new Date();
 const y = now.getUTCMonth() + 1 >= 7 ? now.getUTCFullYear() : now.getUTCFullYear() - 1;
 const p2 = n => String(n % 100).padStart(2, '0');
-const cur = p2(y) + p2(y + 1), prev = p2(y - 1) + p2(y);
+const cur = p2(y) + p2(y + 1), prev = p2(y - 1) + p2(y), prev2 = p2(y - 2) + p2(y - 1);
 const okSeasons = new Set([`${y}/${y + 1}`, `${y - 1}/${y}`, `${y + 1}`, `${y}`, `${y - 1}`]);
 
 const files = {};
@@ -35,7 +35,7 @@ for (const s of [prev, cur]) for (const l of ['E0','SP1','F1','I1','D1','B1','T1
   const t = read(dest); if (t) files[`${s}_${l}`] = t;
 }
 // 2e divisions (pour les équipes promues) : on ne garde que les colonnes utiles
-for (const s of [prev, cur]) for (const l of ['E1','D2','I2','SP2','F2','SC1']) {
+for (const s of [prev2, prev, cur]) for (const l of ['E1','D2','I2','SP2','F2','SC1']) {
   const dest = path.join(RAW, `${s}_${l}.csv`);
   await get(`https://www.football-data.co.uk/mmz4281/${s}/${l}.csv`, dest);
   const t = read(dest); if (!t) continue;
