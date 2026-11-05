@@ -1,0 +1,13 @@
+﻿Country,League,Date,Time,Home,Away,PSH,PSD,PSA,MaxH,MaxD,MaxA,AvgH,AvgD,AvgA,BFEH,BFED,BFEA,B365H,B365D,B365A
+Argentina,Liga Profesional,05/11/2026,18:00,Aldosivi,River Plate,,,,7.5,4.33,1.48,6.9,4.05,1.43,1.1,1.13,1.13,7.5,3.75,1.41
+Argentina,Liga Profesional,05/11/2026,22:15,Gimnasia L.P.,Belgrano,,,,2.5,3.4,2.9,2.41,3.25,2.73,1.1,1.65,1.65,2.45,3.4,2.65
+Brazil,Serie A,03/11/2026,22:30,Chapecoense-SC,Mirassol,,,,3.6,3.5,2.1,3.41,3.41,2.05,3.75,3.6,2.12,3.6,3.3,2.01
+Brazil,Serie A,04/11/2026,00:30,Internacional,Coritiba,,,,1.65,4.1,5.5,1.6,3.91,5.14,1.67,4.2,5.6,1.57,3.9,5.5
+Brazil,Serie A,04/11/2026,22:30,Athletico-PR,Vasco,,,,2.15,3.6,3.4,2.07,3.48,3.25,2.12,3.7,3.5,2.05,3.5,3.4
+Brazil,Serie A,04/11/2026,22:30,Flamengo RJ,Gremio,,,,1.22,8,16.5,1.17,7.08,13.16,1.2,8.2,16.5,1.13,7.5,15
+Brazil,Serie A,05/11/2026,00:30,Botafogo RJ,Atletico-MG,,,,2,3.8,3.9,1.92,3.63,3.57,1.98,3.85,3.8,1.91,3.6,3.9
+Brazil,Serie A,05/11/2026,00:30,Sao Paulo,Corinthians,,,,2.26,3.2,3.3,2.23,3.13,3.22,2.36,3.25,3.45,2.25,3.2,3.3
+Brazil,Serie A,05/11/2026,22:30,Palmeiras,Remo,,,,1.25,6.5,13,1.21,6.11,11.33,1.22,6.8,14.5,1.19,6.5,13
+Brazil,Serie A,06/11/2026,00:30,Cruzeiro,Bahia,,,,1.73,4.2,4.75,1.68,3.98,4.3,1.74,4.1,4.3,1.66,4,4.75
+Brazil,Serie A,06/11/2026,23:00,Vitoria,Fluminense,,,,2.76,3.4,2.55,2.7,3.24,2.47,,,,2.7,3.2,2.5
+Sweden,Allsvenskan,03/11/2026,18:00,Sirius,Halmstad,,,,1.31,6,9.25,1.28,5.52,8.03,1.33,6.4,9.8,1.27,5.5,8.5

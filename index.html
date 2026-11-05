@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZETO Pronos</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script src="data/donnees.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--primary:#00d4ff;--secondary:#ff006e;--success:#00e676;--warning:#ffd60a;--dark:#0f0f1e;--darker:#1a1a2e;--card:#16213e;--text:#e0e0e0;--muted:#9aa4b8;--line:rgba(255,255,255,.08)}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,var(--dark) 0%,var(--darker) 100%);color:var(--text);line-height:1.5;min-height:100vh}
+.header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border-bottom:3px solid var(--primary);padding:18px 16px;text-align:center;box-shadow:0 4px 15px rgba(0,212,255,.2)}
+.header h1{color:var(--primary);font-size:2em;text-shadow:0 0 20px rgba(0,212,255,.5)}
+.header p{font-size:.92em;color:var(--muted)}
+.badges{margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.badge{padding:5px 12px;border-radius:20px;font-size:.8em;font-weight:bold;background:var(--primary);color:var(--dark)}
+.badge.pink{background:var(--secondary);color:#fff}.badge.green{background:var(--success)}.badge.gold{background:var(--warning);color:var(--dark)}
+.container{max-width:1300px;margin:0 auto;padding:16px}
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.tab{padding:10px 18px;border-radius:8px;background:var(--card);border:1px solid var(--line);color:var(--text);cursor:pointer;font-weight:bold;font-size:.95em}
+.tab.active{background:var(--primary);color:var(--dark)}
+.hidden{display:none!important}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
+.card h2{color:var(--primary);font-size:1.2em;margin-bottom:12px}
+.card h3{color:var(--warning);font-size:1em;margin:4px 0 10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr}.header h1{font-size:1.5em}}
+label{display:block;font-size:.85em;color:var(--muted);margin:8px 0 4px}
+select,input{width:100%;padding:10px;border-radius:8px;border:1px solid #2c3a5a;background:#0f1a30;color:var(--text);font-size:.95em}
+input.odd{width:80px;padding:6px;text-align:center}
+.seg{display:flex;gap:0;margin-bottom:10px}
+.seg button{flex:1;padding:10px;border:1px solid #2c3a5a;background:#0f1a30;color:var(--text);cursor:pointer;font-weight:bold}
+.seg button:first-child{border-radius:8px 0 0 8px}.seg button:last-child{border-radius:0 8px 8px 0}
+.seg button.active{background:var(--secondary);color:#fff;border-color:var(--secondary)}
+.btn{margin-top:14px;width:100%;padding:14px;border:none;border-radius:10px;background:linear-gradient(90deg,var(--primary),#0090ff);color:var(--dark);font-weight:bold;font-size:1.05em;cursor:pointer}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.stat{background:#0f1a30;border-radius:8px;padding:8px;text-align:center}
+.stat .v{font-size:1.2em;font-weight:bold;color:var(--primary)}.stat .l{font-size:.75em;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+@media(max-width:800px){.kpis{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:#0f1a30;border-radius:10px;padding:12px;text-align:center}
+.kpi .v{font-size:1.6em;font-weight:bold}.kpi .l{font-size:.8em;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:.9em}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--primary);font-weight:600;font-size:.82em;text-transform:uppercase;letter-spacing:.03em}
+td.n,th.n{text-align:right}
+tr.safe td:first-child{border-left:3px solid var(--primary)}
+.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.78em;font-weight:bold}
+.tag.value{background:var(--success);color:#002}.tag.weak{background:var(--warning);color:#220}.tag.no{background:#3a3f55;color:#ccc}
+.scores{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+@media(max-width:800px){.scores{grid-template-columns:repeat(3,1fr)}}
+.score{background:#0f1a30;border-radius:8px;padding:8px;text-align:center}
+.score .s{font-size:1.2em;font-weight:bold}.score .p{font-size:.8em;color:var(--muted)}
+.verdict{padding:14px;border-radius:10px;background:#0f1a30;border:2px solid var(--success);font-weight:bold;font-size:1.05em}
+.verdict.none{border-color:#555}
+.recos{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
+@media(max-width:800px){.recos{grid-template-columns:1fr}}
+.rc{background:#0f1a30;border-radius:10px;padding:14px;border-top:4px solid var(--primary)}
+.rc.t1{border-top-color:var(--success)}.rc.t2{border-top-color:var(--warning)}.rc.t3{border-top-color:var(--secondary)}
+.rc .k{font-size:.78em;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.rc .m{font-size:1.15em;font-weight:bold;margin:4px 0}
+.rc .pp{font-size:1.6em;font-weight:bold}
+.rc .o{font-size:.88em;margin-top:6px}
+.scen{background:#0f1a30;border-radius:10px;padding:12px;font-size:.95em}
+.note{font-size:.82em;color:var(--muted)}
+.warn{color:var(--warning)}
+.chartbox{position:relative;height:240px}
+.ac{position:relative}.ac-list{position:absolute;z-index:10;left:0;right:0;background:#0f1a30;border:1px solid #2c3a5a;border-radius:8px;max-height:260px;overflow:auto}
+.ac-item{padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--line)}.ac-item:hover{background:#1c2b4d}
+.ac-item small{color:var(--muted)}
+.tablewrap{overflow-x:auto}
+.footer{text-align:center;font-size:.8em;color:var(--muted);padding:20px}
+.err{background:#3a1020;border:1px solid var(--secondary);padding:16px;border-radius:10px}
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>⚽ AZETO PRONOS</h1>
+  <p>Pronostics calculés sur les vrais résultats · championnats et coupes d'Europe</p>
+  <div class="badges" id="badges"></div>
+</div>
+<div class="container">
+  <div id="noData" class="err hidden">
+    <b>Données introuvables.</b> Lance d'abord <b>MAJ_DONNEES.ps1</b> (clic droit → Exécuter avec PowerShell). Il crée le fichier <code>data/donnees.js</code> à côté de cette page.
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="selection">⭐ Sélection du jour</button>
+    <button class="tab" data-tab="match">📊 Analyser un match</button>
+    <button class="tab" data-tab="ligue">🏆 Classement championnat</button>
+    <button class="tab" data-tab="europe">🌍 Classement Europe (Elo)</button>
+    <button class="tab" data-tab="methode">ℹ️ Méthode</button>
+  </div>
+
+  <!-- SELECTION -->
+  <section id="tab-selection">
+    <div class="card">
+      <h2>⭐ Sélection AZETO : les 3 paris les plus solides</h2>
+      <div class="grid2"><div><label>Période</label><select id="selDays"><option value="3">3 prochains jours</option><option value="7" selected>7 prochains jours</option><option value="10">10 prochains jours</option></select></div>
+      <div><label>Championnat</label><select id="selLg"><option>Tous</option></select></div></div>
+      <div id="selPicks" style="margin-top:12px"></div>
+      <p class="note" style="margin-top:10px">Choix automatiques : probabilité entre 75 et 92 %, au moins 15 matchs de données pour chaque équipe, un seul pari par match. Quand la cote du marché est connue (moyenne des bookmakers), un pari sans value est écarté. Vérifie toujours les absences et la composition avant de jouer. Ne combine pas : 3 paris à 90 % ne passent ensemble que 73 % du temps.</p>
+    </div>
+    <div class="card" id="valueCard">
+      <h2>💰 Value détectée avec les cotes du marché</h2>
+      <div id="selValue"></div>
+    </div>
+    <div class="card">
+      <h2>📅 Tous les prochains matchs analysés</h2>
+      <div class="tablewrap"><table id="selT"><thead><tr><th>Date</th><th>Match</th><th>Championnat</th><th class="n">1</th><th class="n">N</th><th class="n">2</th><th class="n">Buts att.</th><th>Meilleur choix</th><th></th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- MATCH -->
+  <section id="tab-match" class="hidden">
+    <div class="card">
+      <div class="seg"><button id="modeL" class="active">Championnat</button><button id="modeE">Coupe d'Europe</button></div>
+      <div id="formL">
+        <label>Championnat</label><select id="lgSel"></select>
+        <div class="grid2">
+          <div><label>Équipe à domicile</label><select id="hSel"></select><div class="stats" id="hStats"></div></div>
+          <div><label>Équipe à l'extérieur</label><select id="aSel"></select><div class="stats" id="aStats"></div></div>
+        </div>
+      </div>
+      <div id="formE" class="hidden">
+        <label>Compétition</label>
+        <select id="compSel"><option>Ligue des champions</option><option>Ligue Europa</option><option>Ligue Conférence</option><option>Supercoupe d'Europe</option><option>Match amical / autre</option></select>
+        <div class="grid2">
+          <div class="ac"><label>Club à domicile (tape un nom)</label><input id="eH" autocomplete="off" placeholder="ex. Arsenal"><div class="ac-list hidden" id="eHl"></div><div class="stats" id="eHs"></div></div>
+          <div class="ac"><label>Club à l'extérieur</label><input id="eA" autocomplete="off" placeholder="ex. Slavia Praha"><div class="ac-list hidden" id="eAl"></div><div class="stats" id="eAs"></div></div>
+        </div>
+        <label><input type="checkbox" id="neutral" style="width:auto"> Terrain neutre (finale)</label>
+      </div>
+      <div class="grid2">
+        <div><label>Ajustement contexte domicile (%) : absences, enjeu, fatigue</label><input type="number" id="adjH" value="0" step="5"></div>
+        <div><label>Ajustement contexte extérieur (%)</label><input type="number" id="adjA" value="0" step="5"></div>
+      </div>
+      <button class="btn" id="go">📊 ANALYSER LE MATCH</button>
+      <p class="note" id="check"></p>
+    </div>
+
+    <div id="res" class="hidden">
+      <div class="card">
+        <h2 id="resTitle"></h2>
+        <div class="kpis" id="kpis"></div>
+      </div>
+      <div class="card"><h2>🧠 Recommandation de pari</h2><div id="reco"></div></div>
+      <div class="grid2">
+        <div class="card"><h2>🎯 Verdict avec tes cotes</h2><div id="verdict"></div><h3 style="margin-top:14px">Marchés à forte probabilité (≥ 75 %)</h3><div id="safe"></div></div>
+        <div class="card"><h2>🔢 Scores les plus probables</h2><div class="scores" id="scores"></div></div>
+      </div>
+      <div class="card">
+        <h2>💰 Tous les marchés</h2>
+        <p class="note">Saisis la cote de ton bookmaker : la page calcule la value (EV = proba × cote − 1). On ne parie que si EV ≥ 3 % et cote ≥ 1,10.</p>
+        <div class="tablewrap"><table id="mk"><thead><tr><th>Marché</th><th class="n">Proba</th><th class="n">Cote juste</th><th class="n">Cote bookmaker</th><th class="n">Value</th><th>Verdict</th></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div class="grid2">
+        <div class="card"><h2>Résultat 1N2</h2><div class="chartbox"><canvas id="c1"></canvas></div></div>
+        <div class="card"><h2>Buts par équipe</h2><div class="chartbox"><canvas id="c2"></canvas></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- LIGUE -->
+  <section id="tab-ligue" class="hidden">
+    <div class="card">
+      <h2>Classement par performances récentes</h2>
+      <label>Championnat</label><select id="lgRank"></select>
+      <p class="note" style="margin-top:8px">Indice de force = différence de buts attendue par match contre une équipe moyenne du championnat. Attaque 1,30 = 30 % de buts de plus que la moyenne ; défense 0,80 = 20 % de buts encaissés en moins (plus bas = mieux). Les matchs récents comptent plus.</p>
+      <div class="tablewrap"><table id="rankT"><thead><tr><th>#</th><th>Équipe</th><th class="n">Indice</th><th class="n">Pts/match</th><th class="n">Att. dom.</th><th class="n">Déf. dom.</th><th class="n">Att. ext.</th><th class="n">Déf. ext.</th><th class="n">Matchs</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- EUROPE -->
+  <section id="tab-europe" class="hidden">
+    <div class="card">
+      <h2>Classement européen Elo</h2>
+      <div class="grid2"><div><label>Pays</label><select id="ctrySel"></select></div><div><label>Rechercher un club</label><input id="eloSearch" placeholder="ex. Ludogorets"></div></div>
+      <p class="note" style="margin-top:8px">Elo = note de force calculée sur tous les matchs (championnat et coupes). +100 points d'écart ≈ 64 % de chances de gagner sur terrain neutre. Source : clubelo.com.</p>
+      <div class="tablewrap"><table id="eloT"><thead><tr><th>#</th><th>Club</th><th>Pays</th><th>Division</th><th class="n">Elo</th><th class="n">Rang pays</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
+  <!-- METHODE -->
+  <section id="tab-methode" class="hidden">
+    <div class="card">
+      <h2>Comment sont calculés les pronostics</h2>
+      <p><b>Championnat.</b> Pour chaque équipe, on mesure les buts marqués et encaissés à domicile et à l'extérieur, comparés à la moyenne du championnat. Chaque match pèse moins à mesure qu'il vieillit (demi-vie 180 jours). On ajoute 4 matchs « moyens » fictifs pour éviter les extrêmes en début de saison. Buts attendus domicile = attaque domicile × défense extérieure adverse × moyenne de buts à domicile du championnat (et inversement).</p><br>
+      <p><b>Coupe d'Europe.</b> Les clubs viennent de championnats différents, donc on utilise l'Elo. Buts attendus domicile = e<sup>0,445 + 0,195 × écart Elo/100</sup>, extérieur = e<sup>0,234 − 0,192 × écart Elo/100</sup>. Ces coefficients ont été estimés sur 6 829 matchs réels de 20 championnats (régression de Poisson).</p><br>
+      <p><b>Scores.</b> Loi de Poisson pour chaque équipe, avec la correction Dixon-Coles des petits scores (0-0, 1-0, 0-1, 1-1). Tous les marchés (1N2, double chance, plus/moins, les deux marquent, but avant 10 minutes) sont tirés de la même grille de scores.</p><br>
+      <p class="warn"><b>Important.</b> Aucun pronostic n'est sûr. Une probabilité de 80 % à la cote de 1,20 (probabilité implicite 83 %) fait perdre de l'argent sur la durée. Seuls les paris où la probabilité dépasse nettement 1/cote ont un intérêt. Jeu interdit aux moins de 18 ans. Joue avec modération.</p><br>
+      <p class="note" id="srcNote"></p>
+    </div>
+  </section>
+  <div class="footer">AZETO Pronos · les probabilités sont des estimations statistiques, pas des certitudes · 18+ · jeu responsable</div>
+</div>
+
+<script>
+"use strict";
+/* ---------- paramètres du modèle (identiques au fichier Excel v4) ---------- */
+const P = {half:180, k:4, rho:-0.05, tmin:10, cmin:1.10, evmin:0.03, psafe:0.75, a:0.445, b:0.195, c:0.234, d:-0.192, fbH:1.45, fbA:1.15};
+const MAIN = {E0:'Angleterre - Premier League',SP1:'Espagne - LaLiga',F1:'France - Ligue 1',I1:'Italie - Serie A',D1:'Allemagne - Bundesliga',B1:'Belgique - Pro League',T1:'Turquie - Süper Lig',SC0:'Écosse - Premiership',G1:'Grèce - Super League',N1:'Pays-Bas - Eredivisie',P1:'Portugal - Liga Portugal'};
+const NEW = {AUT:'Autriche - Bundesliga',DNK:'Danemark - Superliga',FIN:'Finlande - Veikkausliiga',NOR:'Norvège - Eliteserien',POL:'Pologne - Ekstraklasa',SWZ:'Suisse - Super League',ROU:'Roumanie - Liga 1',SWE:'Suède - Allsvenskan',IRL:'Irlande - Premier Division'};
+const FR = {'Albania':'Albanie','Andorra':'Andorre','Armenia':'Arménie','Austria':'Autriche','Azerbaijan':'Azerbaïdjan','Belarus':'Biélorussie','Belgium':'Belgique','Bosnia and Herzegovina':'Bosnie-Herzégovine','Bulgaria':'Bulgarie','Croatia':'Croatie','Cyprus':'Chypre','Czech Republic':'Tchéquie','Denmark':'Danemark','England':'Angleterre','Estonia':'Estonie','Faroe Islands':'Îles Féroé','Finland':'Finlande','France':'France','Georgia':'Géorgie','Germany':'Allemagne','Gibraltar':'Gibraltar','Greece':'Grèce','Hungary':'Hongrie','Iceland':'Islande','Ireland':'Irlande','Israel':'Israël','Italy':'Italie','Kazakhstan':'Kazakhstan','Kosovo':'Kosovo','Latvia':'Lettonie','Lithuania':'Lituanie','Luxembourg':'Luxembourg','Malta':'Malte','Moldova':'Moldavie','Montenegro':'Monténégro','Netherlands':'Pays-Bas','North Macedonia':'Macédoine du Nord','Northern Ireland':'Irlande du Nord','Norway':'Norvège','Poland':'Pologne','Portugal':'Portugal','Romania':'Roumanie','Russia':'Russie','San Marino':'Saint-Marin','Scotland':'Écosse','Serbia':'Serbie','Slovakia':'Slovaquie','Slovenia':'Slovénie','Spain':'Espagne','Sweden':'Suède','Switzerland':'Suisse','Turkey':'Turquie','Ukraine':'Ukraine','Wales':'Pays de Galles'};
+
+const $ = id => document.getElementById(id);
+const pct = x => (x*100).toFixed(1).replace('.',',')+' %';
+const f2 = x => x.toFixed(2).replace('.',',');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- lecture des données ---------- */
+function parseCSV(txt){
+  const lines = txt.replace(/^﻿/,'').split(/\r?\n/).filter(l => l.trim());
+  const head = lines[0].split(',');
+  return lines.slice(1).map(l => { const p = l.split(','); const o = {}; head.forEach((h,i) => o[h] = p[i]); return o; });
+}
+function parseDate(s){ const [d,m,y] = s.split('/').map(Number); return new Date(Date.UTC(y < 100 ? 2000+y : y, m-1, d)); }
+
+function loadMatches(D){
+  const rows = [];
+  for (const [key, txt] of Object.entries(D.files)) {
+    const [pre, code] = key.split('_');
+    if (pre === 'new') {
+      for (const r of parseCSV(txt)) {
+        if (!r.HG || !r.Home) continue;
+        rows.push({date: parseDate(r.Date), lg: NEW[code], season: r.Season, h: r.Home.trim(), a: r.Away.trim(), hg: +r.HG, ag: +r.AG});
+      }
+    } else if (MAIN[code]) {
+      for (const r of parseCSV(txt)) {
+        if (r.FTHG === undefined || r.FTHG === '' || !r.HomeTeam) continue;
+        rows.push({date: parseDate(r.Date), lg: MAIN[code], season: pre, h: r.HomeTeam.trim(), a: r.AwayTeam.trim(), hg: +r.FTHG, ag: +r.FTAG});
+      }
+    }
+  }
+  return rows;
+}
+
+function parseElo(html){
+  const out = [];
+  if (!html) return out;
+  const items = html.split('<div class="accordion-item">');
+  for (const it of items) {
+    const m = it.match(/<div class="accordion-header">\s*<a href="[^"]+">([^<]+)<\/a>/);
+    if (!m) continue;
+    const ctry = FR[m[1].trim()];
+    if (!ctry) continue;
+    let level = '?';
+    for (const r of it.split('<tr>')) {
+      const lv = r.match(/<i>\s*Level (\d+)/); if (lv) level = lv[1] === '1' ? '1re division' : lv[1] + 'e division';
+      if (/<i>\s*Lower/.test(r)) level = 'Divisions inférieures';
+      const c = r.match(/<span class="Ast">([^<]+)<\/span>[\s\S]*?<td class="r">(\d+)<\/td>/);
+      if (c) out.push({ctry, level, club: c[1].trim().replace(/&amp;/g,'&'), elo: +c[2]});
+    }
+  }
+  out.sort((x,y) => y.elo - x.elo);
+  out.forEach((e,i) => e.rank = i+1);
+  const byC = {};
+  for (const e of out) { byC[e.ctry] = (byC[e.ctry]||0) + 1; e.crank = byC[e.ctry]; }
+  return out;
+}
+
+/* ---------- modèle championnat ---------- */
+function buildModel(rows){
+  const dref = Math.max(...rows.map(r => +r.date));
+  const lg = {}, tm = {};
+  for (const r of rows) {
+    const w = Math.exp(-Math.LN2 * Math.max(0, (dref - r.date)/86400000) / P.half);
+    const L = lg[r.lg] ||= {w:0, hg:0, ag:0, n:0, cur:new Set(), lastSeason:''};
+    L.w += w; L.hg += w*r.hg; L.ag += w*r.ag; L.n++;
+    const ph = r.hg > r.ag ? 3 : r.hg === r.ag ? 1 : 0, pa = r.ag > r.hg ? 3 : r.hg === r.ag ? 1 : 0;
+    const H = tm[r.lg+'|'+r.h] ||= {lg:r.lg, name:r.h, hw:0, hs:0, hc:0, aw:0, as:0, ac:0, pts:0, n:0};
+    const A = tm[r.lg+'|'+r.a] ||= {lg:r.lg, name:r.a, hw:0, hs:0, hc:0, aw:0, as:0, ac:0, pts:0, n:0};
+    H.hw += w; H.hs += w*r.hg; H.hc += w*r.ag; H.pts += w*ph; H.n++;
+    A.aw += w; A.as += w*r.ag; A.ac += w*r.hg; A.pts += w*pa; A.n++;
+  }
+  // équipes de la saison en cours = celles qui ont joué la saison la plus récente du championnat
+  const lastSeason = {};
+  for (const r of rows) { if (!lastSeason[r.lg] || r.date > lastSeason[r.lg].date) lastSeason[r.lg] = {season:r.season, date:r.date}; }
+  const curTeams = {};
+  for (const r of rows) if (r.season === lastSeason[r.lg].season) { (curTeams[r.lg] ||= new Set()).add(r.h); curTeams[r.lg].add(r.a); }
+  for (const L of Object.keys(lg)) { lg[L].LH = lg[L].hg/lg[L].w; lg[L].LA = lg[L].ag/lg[L].w; }
+  const teams = {};
+  for (const t of Object.values(tm)) {
+    if (!curTeams[t.lg] || !curTeams[t.lg].has(t.name)) continue;
+    const {LH, LA} = lg[t.lg], k = P.k;
+    t.attH = ((t.hs + k*LH)/(t.hw + k))/LH;
+    t.defH = ((t.hc + k*LA)/(t.hw + k))/LA;
+    t.attA = ((t.as + k*LA)/(t.aw + k))/LA;
+    t.defA = ((t.ac + k*LH)/(t.aw + k))/LH;
+    t.idx = (t.attH*LH - t.defH*LA + t.attA*LA - t.defA*LH)/2;
+    t.ppm = (t.hw + t.aw) > 0 ? t.pts/(t.hw + t.aw) : 0;
+    (teams[t.lg] ||= []).push(t);
+  }
+  for (const L of Object.keys(teams)) { teams[L].sort((x,y) => y.idx - x.idx); teams[L].forEach((t,i) => t.rank = i+1); }
+  return {lg, teams, dref: new Date(dref)};
+}
+
+/* ---------- grille des scores et marchés ---------- */
+function pois(k, l){ let p = Math.exp(-l); for (let i = 1; i <= k; i++) p *= l/i; return p; }
+function markets(lh, la){
+  const N = 11, M = [];
+  let S = 0;
+  for (let i = 0; i < N; i++) { M.push([]); for (let j = 0; j < N; j++) {
+    let tau = 1;
+    if (i===0 && j===0) tau = 1 - lh*la*P.rho; else if (i===0 && j===1) tau = 1 + lh*P.rho; else if (i===1 && j===0) tau = 1 + la*P.rho; else if (i===1 && j===1) tau = 1 - P.rho;
+    const v = pois(i,lh)*pois(j,la)*tau; M[i].push(v); S += v; } }
+  let p1=0, px=0, p2=0, btts=0; const under = [0,0,0,0,0]; const sc = [];
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+    const v = M[i][j]/S;
+    if (i>j) p1+=v; else if (i===j) px+=v; else p2+=v;
+    if (i>0 && j>0) btts += v;
+    for (let g = 0; g < 5; g++) if (i+j <= g) under[g] += v;
+    sc.push({s:`${i} - ${j}`, p:v});
+  }
+  sc.sort((x,y) => y.p - x.p);
+  const early = 1 - Math.exp(-(lh+la)/90*P.tmin);
+  const list = [
+    ['1 - Victoire domicile', p1], ['N - Match nul', px], ['2 - Victoire extérieur', p2],
+    ['1N - Double chance', p1+px], ['N2 - Double chance', px+p2], ['12 - Double chance', p1+p2]];
+  for (let g = 0; g < 5; g++) { list.push([`Moins de ${g},5 buts`, under[g]]); list.push([`Plus de ${g},5 buts`, 1-under[g]]); }
+  list.push(['Les deux marquent : OUI', btts], ['Les deux marquent : NON', 1-btts], [`But avant ${P.tmin} min : OUI`, early], [`But avant ${P.tmin} min : NON`, 1-early]);
+  return {p1, px, p2, btts, under, list, scores: sc.slice(0,10), lh, la};
+}
+
+
+/* ---------- sélection du jour ---------- */
+const OFB = {'en.1':'Angleterre - Premier League','es.1':'Espagne - LaLiga','it.1':'Italie - Serie A','de.1':'Allemagne - Bundesliga','fr.1':'France - Ligue 1','nl.1':'Pays-Bas - Eredivisie','pt.1':'Portugal - Liga Portugal'};
+const NEWC = {Austria:'AUT',Denmark:'DNK',Finland:'FIN',Norway:'NOR',Poland:'POL',Switzerland:'SWZ',Romania:'ROU',Sweden:'SWE',Ireland:'IRL'};
+const ALIAS = {'Nottingham Forest FC':"Nott'm Forest",'Manchester City FC':'Man City','Manchester United FC':'Man United','Wolverhampton Wanderers FC':'Wolves','Athletic Club':'Ath Bilbao','Club Atlético de Madrid':'Ath Madrid','Rayo Vallecano de Madrid':'Vallecano','RCD Espanyol de Barcelona':'Espanol','Real Betis Balompié':'Betis','Real Sociedad de Fútbol':'Sociedad','RC Celta de Vigo':'Celta','Borussia Mönchengladbach':"M'gladbach",'Eintracht Frankfurt':'Ein Frankfurt','1. FC Köln':'FC Koln','Paris Saint-Germain FC':'Paris SG','AS Saint-Étienne':'St Etienne','Sporting Clube de Portugal':'Sp Lisbon','SC Braga':'Sp Braga','Sporting Clube de Braga':'Sp Braga','FC Internazionale Milano':'Inter','AC Milan':'Milan','SS Lazio':'Lazio','AS Roma':'Roma','Hellas Verona FC':'Verona','ACF Fiorentina':'Fiorentina','1. FSV Mainz 05':'Mainz','FC Bayern München':'Bayern Munich','Stade Rennais FC 1901':'Rennes','Lille OSC':'Lille','Fortuna Sittard':'For Sittard','Telstar 1963':'Telstar','FC Utrecht':'Utrecht','NEC':'Nijmegen','Rio Ave FC':'Rio Ave'};
+const normT = s => s.normalize('NFKD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\b(fc|cf|sc|ac|afc|ss|us|ssc|as|cd|ud|rc|ca|sv|vfl|vfb|tsg|rcd|club|de|calcio|1963|1899|04|05|bc|ogc|stade|olympique|aj|es)\b/g,' ').replace(/[^a-z0-9]/g,'');
+function findTeam(lg, name){
+  const ts = MODEL.teams[lg]; if (!ts) return null;
+  if (ALIAS[name]) { const t = ts.find(t => t.name === ALIAS[name]); if (t) return t; }
+  let t = ts.find(t => t.name === name); if (t) return t;
+  const k = normT(name); t = ts.find(t => normT(t.name) === k); if (t) return t;
+  const c = ts.filter(t => { const n = normT(t.name); return n && (k.includes(n) || n.includes(k)); });
+  return c.length === 1 ? c[0] : null;
+}
+const OK_KEYS = {'1 - Victoire domicile':'AvgH','N - Match nul':'AvgD','2 - Victoire extérieur':'AvgA','Plus de 2,5 buts':'Avg>2.5','Moins de 2,5 buts':'Avg<2.5'};
+let UPCOMING = [];
+function buildUpcoming(D){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const map = {};
+  const add = (lg, date, time, hn, an, odds) => {
+    const H = findTeam(lg, hn), A = findTeam(lg, an); if (!H || !A || H === A) return;
+    if (date < today) return;
+    const key = lg + '|' + H.name + '|' + A.name;
+    if (map[key]) { if (odds) map[key].odds = odds; return; }
+    map[key] = {lg, date, time, H, A, odds};
+  };
+  for (const c of (D.calendrier || [])) { const d = new Date(c.date + 'T00:00:00'); add(OFB[c.code], d, c.time || '', c.h, c.a, null); }
+  if (D.files.fix_main) for (const r of parseCSV(D.files.fix_main)) { if (!MAIN[r.Div]) continue; const [d,m,y] = r.Date.split('/').map(Number); add(MAIN[r.Div], new Date(y<100?2000+y:y, m-1, d), r.Time, r.HomeTeam.trim(), r.AwayTeam.trim(), r); }
+  if (D.files.fix_new) for (const r of parseCSV(D.files.fix_new)) { const c = NEWC[r.Country]; if (!c) continue; const [d,m,y] = r.Date.split('/').map(Number); add(NEW[c], new Date(y, m-1, d), r.Time, r.Home.trim(), r.Away.trim(), r); }
+  UPCOMING = Object.values(map).sort((x,y) => x.date - y.date || x.lg.localeCompare(y.lg));
+  for (const u of UPCOMING) {
+    const L = MODEL.lg[u.lg];
+    u.r = markets(u.H.attH*u.A.defA*L.LH, u.A.attA*u.H.defH*L.LA);
+    u.n = Math.min(u.H.n, u.A.n);
+    u.cands = u.r.list.map(([nm,p]) => {
+      const k = OK_KEYS[nm]; const o = u.odds && k && +u.odds[k] > 1 ? +u.odds[k] : null;
+      return {nm, p, o, ev: o ? p*o - 1 : null, g: recoGroup(nm)};
+    });
+  }
+  const lgs = [...new Set(UPCOMING.map(u => u.lg))].sort();
+  $('selLg').innerHTML = '<option>Tous</option>' + lgs.map(l => `<option>${esc(l)}</option>`).join('');
+}
+function drawSelection(){
+  const days = +$('selDays').value, lgf = $('selLg').value;
+  const lim = new Date(); lim.setHours(0,0,0,0); lim.setDate(lim.getDate() + days);
+  const list = UPCOMING.filter(u => u.date <= lim && (lgf === 'Tous' || u.lg === lgf));
+  const dstr = u => u.date.toLocaleDateString('fr-FR', {weekday:'short', day:'2-digit', month:'2-digit'}) + (u.time ? ' ' + u.time : '');
+  // sélection sécurité
+  const picks = [];
+  for (const u of list) {
+    if (u.n < 15) continue;
+    const c = u.cands.filter(x => x.g && x.p >= 0.75 && x.p < 0.92 && (x.o === null || (x.ev >= P.evmin && x.o >= P.cmin))).sort((a,b) => b.p - a.p)[0];
+    if (c) picks.push({u, c});
+  }
+  picks.sort((a,b) => b.c.p - a.c.p);
+  const top = picks.slice(0,3);
+  $('selPicks').innerHTML = !list.length ? '<p class="note">Aucun match à venir dans les données pour cette période. Lance la mise à jour (MAJ_DONNEES.ps1).</p>'
+    : !top.length ? '<p class="note">Aucun pari ne remplit les critères sur cette période : mieux vaut ne pas jouer.</p>'
+    : '<div class="recos">' + top.map((x,i) => `<div class="rc t1"><div class="k">Choix ${i+1} · ${dstr(x.u)} · ${esc(x.u.lg)}</div><div class="m">${esc(x.u.H.name)} – ${esc(x.u.A.name)}</div><div style="font-size:1.05em;font-weight:bold;color:var(--success)">${x.c.nm}</div><div class="pp">${pct(x.c.p)}</div><div class="o">${x.c.o ? `Cote marché ${f2(x.c.o)} · value ${(x.c.ev*100).toFixed(1).replace('.',',')} %` : `Joue-le seulement si la cote est <b>≥ ${f2(minOdd(x.c.p))}</b>`}</div><div class="note">Buts attendus ${f2(x.u.r.lh)} – ${f2(x.u.r.la)} · rangs ${x.u.H.rank}e / ${x.u.A.rank}e</div></div>`).join('') + '</div>'
+      + (picks.length > 3 ? '<h3 style="margin-top:14px">En réserve</h3><table>' + picks.slice(3,8).map(x => `<tr><td>${dstr(x.u)}</td><td>${esc(x.u.H.name)} – ${esc(x.u.A.name)}</td><td>${x.c.nm}</td><td class="n">${pct(x.c.p)}</td><td class="n">cote ≥ ${f2(minOdd(x.c.p))}</td></tr>`).join('') + '</table>' : '');
+  // value avec cotes du marché
+  const vals = [];
+  for (const u of list) for (const c of u.cands) if (c.o && c.p >= 0.45 && c.ev >= P.evmin && c.o >= P.cmin) vals.push({u, c});
+  vals.sort((a,b) => b.c.ev - a.c.ev);
+  const hasOdds = list.some(u => u.odds);
+  $('selValue').innerHTML = !hasOdds ? '<p class="note">Pas encore de cotes du marché pour ces matchs. Elles arrivent en général 2 à 3 jours avant (fichier fixtures de football-data). Relance la mise à jour plus près du match.</p>'
+    : !vals.length ? '<p class="note">Aucune value avec les cotes moyennes du marché sur cette période.</p>'
+    : '<table><tr><th>Date</th><th>Match</th><th>Pari</th><th class="n">Proba</th><th class="n">Cote marché</th><th class="n">Value</th></tr>' + vals.slice(0,10).map(x => `<tr><td>${dstr(x.u)}</td><td>${esc(x.u.H.name)} – ${esc(x.u.A.name)}</td><td>${x.c.nm}</td><td class="n">${pct(x.c.p)}</td><td class="n">${f2(x.c.o)}</td><td class="n"><span class="tag value">+${(x.c.ev*100).toFixed(1).replace('.',',')} %</span></td></tr>`).join('') + '</table><p class="note" style="margin-top:6px">Cote marché = moyenne des bookmakers. Vérifie la cote de ton propre bookmaker : elle peut être plus basse.</p>';
+  // table complète
+  $('selT').querySelector('tbody').innerHTML = list.map((u,i) => {
+    const b = u.cands.filter(x => x.g && x.p >= 0.58 && x.p < 0.92).sort((a,b) => b.p - a.p)[0];
+    return `<tr><td>${dstr(u)}</td><td><b>${esc(u.H.name)} – ${esc(u.A.name)}</b>${u.n < 15 ? ' <span class="tag weak">peu de données</span>' : ''}</td><td>${esc(u.lg)}</td><td class="n">${pct(u.r.p1)}</td><td class="n">${pct(u.r.px)}</td><td class="n">${pct(u.r.p2)}</td><td class="n">${f2(u.r.lh)} – ${f2(u.r.la)}</td><td>${b ? b.nm + ' (' + pct(b.p) + ')' : '<span class="note">—</span>'}</td><td><button class="tab" style="padding:4px 10px;font-size:.8em" data-open="${UPCOMING.indexOf(u)}">Détail</button></td></tr>`;
+  }).join('') || '<tr><td colspan="9" class="note">Aucun match.</td></tr>';
+  document.querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => openMatch(UPCOMING[+btn.dataset.open]));
+}
+function openMatch(u){
+  document.querySelector('[data-tab=match]').click(); setMode('L');
+  $('lgSel').value = u.lg; fillTeams(); $('hSel').value = u.H.name; $('aSel').value = u.A.name; showTeam('h'); showTeam('a');
+  analyse();
+  if (u.odds) document.querySelectorAll('#mk input.odd').forEach(x => { const k = OK_KEYS[current.list[+x.dataset.i][0]]; if (k && +u.odds[k] > 1) x.value = u.odds[k]; });
+  updateValue();
+}
+
+/* ---------- interface ---------- */
+let MODEL = null, ELO = [], mode = 'L', current = null, charts = {}, REL = 'moyenne', NAMES = ['', ''];
+function init(){
+  const D = window.AZ_DATA;
+  if (!D) { $('noData').classList.remove('hidden'); return; }
+  const rows = loadMatches(D);
+  MODEL = buildModel(rows);
+  ELO = parseElo(D.elo_html);
+  const leagues = Object.keys(MAIN).map(k => MAIN[k]).concat(Object.keys(NEW).map(k => NEW[k])).filter(l => MODEL.teams[l]);
+  $('badges').innerHTML = `<span class="badge">${rows.length.toLocaleString('fr-FR')} matchs</span><span class="badge pink">${leagues.length} championnats</span><span class="badge green">${ELO.length.toLocaleString('fr-FR')} clubs Elo</span><span class="badge gold">Données du ${esc(D.maj)} · dernier match ${MODEL.dref.toLocaleDateString('fr-FR',{timeZone:'UTC'})}</span>`;
+  $('srcNote').textContent = `Sources : résultats football-data.co.uk, Elo clubelo.com. Dernière mise à jour : ${D.maj}.`;
+  const opts = leagues.map(l => `<option>${esc(l)}</option>`).join('');
+  $('lgSel').innerHTML = opts; $('lgRank').innerHTML = opts;
+  $('lgSel').onchange = fillTeams; fillTeams();
+  $('lgRank').onchange = drawRank; drawRank();
+  const ctries = [...new Set(ELO.map(e => e.ctry))].sort((a,b) => a.localeCompare(b,'fr'));
+  $('ctrySel').innerHTML = '<option>Tous les pays</option>' + ctries.map(c => `<option>${esc(c)}</option>`).join('');
+  $('ctrySel').onchange = drawElo; $('eloSearch').oninput = drawElo; drawElo();
+  setupAC('eH','eHl','eHs'); setupAC('eA','eAl','eAs');
+  buildUpcoming(D); $('selDays').onchange = drawSelection; $('selLg').onchange = drawSelection; drawSelection();
+  if (!ELO.length) $('modeE').title = "Elo indisponible : relance la mise à jour";
+}
+function fillTeams(){
+  const ts = [...MODEL.teams[$('lgSel').value]].sort((a,b) => a.name.localeCompare(b.name,'fr'));
+  const o = ts.map(t => `<option>${esc(t.name)}</option>`).join('');
+  $('hSel').innerHTML = o; $('aSel').innerHTML = o;
+  if (ts.length > 1) $('aSel').selectedIndex = 1;
+  $('hSel').onchange = () => showTeam('h'); $('aSel').onchange = () => showTeam('a');
+  showTeam('h'); showTeam('a');
+}
+function team(lg, name){ return MODEL.teams[lg].find(t => t.name === name); }
+function showTeam(side){
+  const t = team($('lgSel').value, $(side+'Sel').value); if (!t) return;
+  $(side+'Stats').innerHTML = [['Rang', t.rank], ['Indice', (t.idx>=0?'+':'')+f2(t.idx)], ['Matchs', t.n],
+    [side==='h'?'Att. dom.':'Att. ext.', f2(side==='h'?t.attH:t.attA)], [side==='h'?'Déf. dom.':'Déf. ext.', f2(side==='h'?t.defH:t.defA)], ['Pts/match', f2(t.ppm)]]
+    .map(([l,v]) => `<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+}
+function setupAC(inp, list, stats){
+  const I = $(inp), Lst = $(list);
+  I.addEventListener('input', () => {
+    const q = I.value.trim().toLowerCase(); I.dataset.sel = '';
+    if (!q) { Lst.classList.add('hidden'); return; }
+    const m = ELO.filter(e => e.club.toLowerCase().includes(q) || e.ctry.toLowerCase().includes(q)).slice(0,12);
+    Lst.innerHTML = m.map(e => `<div class="ac-item" data-i="${ELO.indexOf(e)}">${esc(e.club)} <small>· ${esc(e.ctry)} · Elo ${e.elo}</small></div>`).join('');
+    Lst.classList.toggle('hidden', !m.length);
+  });
+  Lst.addEventListener('click', ev => {
+    const it = ev.target.closest('.ac-item'); if (!it) return;
+    const e = ELO[+it.dataset.i]; I.value = e.club; I.dataset.sel = it.dataset.i; Lst.classList.add('hidden');
+    $(stats).innerHTML = [['Elo', e.elo], ['Rang Europe', e.rank], ['Pays', esc(e.ctry)]].map(([l,v]) => `<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+  });
+  document.addEventListener('click', ev => { if (ev.target !== I) Lst.classList.add('hidden'); });
+}
+function setMode(m){
+  mode = m; $('modeL').classList.toggle('active', m==='L'); $('modeE').classList.toggle('active', m==='E');
+  $('formL').classList.toggle('hidden', m!=='L'); $('formE').classList.toggle('hidden', m!=='E');
+}
+function analyse(){
+  const adjH = 1 + (+$('adjH').value||0)/100, adjA = 1 + (+$('adjA').value||0)/100;
+  let lh, la, title, kp, warn = '';
+  if (mode === 'L') {
+    const L = $('lgSel').value, H = team(L, $('hSel').value), A = team(L, $('aSel').value);
+    if (!H || !A || H === A) { $('check').textContent = 'Choisis deux équipes différentes.'; return; }
+    const lgv = MODEL.lg[L];
+    lh = H.attH * A.defA * lgv.LH * adjH; la = A.attA * H.defH * lgv.LA * adjA;
+    title = `${H.name} – ${A.name} · ${L}`;
+    REL = Math.min(H.n, A.n) >= 15 ? 'bonne' : Math.min(H.n, A.n) >= 6 ? 'moyenne' : 'faible'; NAMES = [H.name, A.name];
+    if (Math.min(H.n, A.n) < 6) warn = 'Attention : moins de 6 matchs pour une équipe, résultat peu fiable.';
+  } else {
+    const hi = $('eH').dataset.sel, ai = $('eA').dataset.sel;
+    if (hi === '' || ai === '' || hi === undefined || ai === undefined || hi === ai) { $('check').textContent = 'Choisis deux clubs différents dans les listes.'; return; }
+    const H = ELO[+hi], A = ELO[+ai], dr = H.elo - A.elo, neutral = $('neutral').checked;
+    const ka = neutral ? (P.a + P.c)/2 : P.a, kc = neutral ? (P.a + P.c)/2 : P.c;
+    lh = Math.exp(ka + P.b*dr/100) * adjH; la = Math.exp(kc + P.d*dr/100) * adjA;
+    title = `${H.club} – ${A.club} · ${$('compSel').value}${neutral ? ' (terrain neutre)' : ''}`;
+    REL = 'moyenne'; NAMES = [H.club, A.club];
+  }
+  $('check').textContent = warn;
+  current = markets(lh, la);
+  render(title);
+}
+function render(title){
+  const r = current;
+  $('res').classList.remove('hidden');
+  $('resTitle').textContent = title;
+  $('kpis').innerHTML = [['Buts attendus dom.', f2(r.lh), 'var(--primary)'], ['Buts attendus ext.', f2(r.la), 'var(--secondary)'],
+    ['Victoire dom. / Nul / Victoire ext.', `${pct(r.p1)} · ${pct(r.px)} · ${pct(r.p2)}`, 'var(--text)'], ['Total buts attendus', f2(r.lh+r.la), 'var(--warning)']]
+    .map(([l,v,c]) => `<div class="kpi"><div class="v" style="color:${c};${v.length>12?'font-size:1em':''}">${v}</div><div class="l">${l}</div></div>`).join('');
+  $('scores').innerHTML = r.scores.map(s => `<div class="score"><div class="s">${s.s}</div><div class="p">${pct(s.p)} · cote ${f2(1/s.p)}</div></div>`).join('');
+  const tb = $('mk').querySelector('tbody');
+  tb.innerHTML = r.list.map(([n,p],i) => `<tr class="${p>=P.psafe?'safe':''}"><td>${n}</td><td class="n">${pct(p)}</td><td class="n">${f2(1/p)}</td><td class="n"><input class="odd" data-i="${i}" type="number" step="0.01" min="1" placeholder="—"></td><td class="n" id="ev${i}"></td><td id="vd${i}"></td></tr>`).join('');
+  tb.querySelectorAll('input.odd').forEach(x => x.addEventListener('input', updateValue));
+  updateValue();
+  drawCharts();
+  $('res').scrollIntoView({behavior:'smooth'});
+}
+
+/* ---------- recommandation automatique ---------- */
+function recoGroup(n){
+  if (/0,5 buts|4,5 buts|But avant/.test(n)) return null;          // marchés trop extrêmes ou peu proposés
+  if (/Victoire|Match nul|Double chance/.test(n)) return 'Résultat';
+  if (/buts/.test(n)) return 'Buts';
+  if (/deux marquent/.test(n)) return 'Les deux marquent';
+  return null;
+}
+function minOdd(p){ return Math.max(P.cmin, (1 + P.evmin)/p); }
+function recommend(r, odds){
+  const c = r.list.map(([n,p],i) => ({n, p, i, g: recoGroup(n)})).filter(x => x.g);
+  const pick = (lo, hi, excl) => c.filter(x => x.p >= lo && x.p < hi && !excl.includes(x.g)).sort((a,b) => b.p - a.p)[0];
+  const t1 = pick(0.75, 0.92, []);
+  const t2 = pick(0.58, 0.75, t1 ? [t1.g] : []) || pick(0.58, 0.75, []);
+  const t3 = c.filter(x => x.p >= 0.40 && x.p < 0.58 && /Victoire|Match nul|2,5 buts|deux marquent/.test(x.n)).sort((a,b) => b.p - a.p)[0];
+  // scénario
+  const fav = r.p1 > r.p2 + 0.12 ? `${NAMES[0]} est favori (${pct(r.p1)})` : r.p2 > r.p1 + 0.12 ? `${NAMES[1]} est favori (${pct(r.p2)})` : `match équilibré (${pct(r.p1)} / ${pct(r.px)} / ${pct(r.p2)})`;
+  const tot = r.lh + r.la;
+  const buts = tot >= 3.0 ? 'match plutôt ouvert' : tot <= 2.2 ? 'match plutôt fermé' : 'nombre de buts dans la moyenne';
+  const bt = r.btts >= 0.55 ? 'les deux équipes devraient marquer' : r.btts <= 0.45 ? 'au moins une équipe risque de rester muette' : 'les deux marquent : incertain';
+  const card = (cls, k, x, txt) => {
+    if (!x) return `<div class="rc ${cls}"><div class="k">${k}</div><div class="m">Aucun marché</div><div class="o note">Pas de marché dans cette tranche pour ce match.</div></div>`;
+    const o = odds[x.i], need = minOdd(x.p);
+    let st = `<div class="o">Joue-le seulement si la cote est <b>≥ ${f2(need)}</b> (cote juste ${f2(1/x.p)}).</div>`;
+    if (o) st = (x.p*o - 1 >= P.evmin && o >= P.cmin) ? `<div class="o"><span class="tag value">VALUE</span> ta cote ${f2(o)} ≥ ${f2(need)} : à jouer</div>` : `<div class="o"><span class="tag no">À ÉVITER</span> ta cote ${f2(o)} &lt; ${f2(need)}</div>`;
+    return `<div class="rc ${cls}"><div class="k">${k}</div><div class="m">${x.n}</div><div class="pp">${pct(x.p)}</div><div class="note">${txt}</div>${st}</div>`;
+  };
+  $('reco').innerHTML = `<div class="scen">📋 <b>Lecture du match :</b> ${esc(fav)}, ${buts} (${f2(tot)} buts attendus), ${bt}. Fiabilité des données : <b>${REL}</b>.</div>
+   <div class="recos">${card('t1', '1. Pari sécurité (75-92 %)', t1, 'Le choix le plus sûr selon le modèle.')}
+   ${card('t2', '2. Pari équilibré (58-75 %)', t2, 'Meilleur compromis entre risque et cote.')}
+   ${card('t3', '3. Pari audacieux (40-58 %)', t3, 'Plus risqué, cote plus intéressante.')}</div>
+   <p class="note" style="margin-top:10px">Conseil : mise fixe (1 à 2 % de ta bankroll par pari), un seul pari par match, et évite les combinés : 4 paris à 85 % ne passent ensemble que 52 % du temps. Si la cote de ton bookmaker est sous le minimum indiqué, ne joue pas : même gagnant souvent, tu perdrais de l'argent sur la durée.</p>`;
+}
+function updateValue(){
+  const r = current; let best = null;
+  const odds = {};
+  document.querySelectorAll('#mk input.odd').forEach(x => { const v = parseFloat(x.value.replace(',','.')); if (v > 1) odds[x.dataset.i] = v; });
+  r.list.forEach(([n,p],i) => {
+    const o = odds[i];
+    if (!o) { $('ev'+i).textContent = ''; $('vd'+i).innerHTML = ''; return; }
+    const ev = p*o - 1;
+    $('ev'+i).textContent = (ev>=0?'+':'') + (ev*100).toFixed(1).replace('.',',') + ' %';
+    const isV = ev >= P.evmin && o >= P.cmin;
+    $('vd'+i).innerHTML = isV ? '<span class="tag value">VALUE</span>' : ev > 0 ? '<span class="tag weak">Faible avantage</span>' : '<span class="tag no">Pas de value</span>';
+    if (isV && (!best || ev > best.ev)) best = {n, ev, o, p};
+  });
+  recommend(r, odds);
+  const nOdds = Object.keys(odds).length;
+  $('verdict').innerHTML = !nOdds ? '<div class="verdict none">Saisis les cotes de ton bookmaker dans le tableau des marchés pour obtenir un verdict.</div>'
+    : best ? `<div class="verdict">✅ Meilleur pari value : ${best.n}<br><span class="note">Proba ${pct(best.p)} · cote ${f2(best.o)} · value ${(best.ev*100).toFixed(1).replace('.',',')} %</span></div>`
+    : '<div class="verdict none">❌ NE PAS PARIER : aucune value avec les cotes saisies.</div>';
+  const safe = r.list.map((x,i) => ({n:x[0], p:x[1], i})).filter(x => x.p >= P.psafe).sort((a,b) => b.p - a.p).slice(0,6);
+  $('safe').innerHTML = safe.length ? '<table><tr><th>Marché</th><th class="n">Proba</th><th class="n">Cote juste</th><th>Avec ta cote</th></tr>' + safe.map(s => {
+    const o = odds[s.i]; const t = !o ? '<span class="note">saisir la cote</span>' : (s.p*o-1 >= P.evmin && o >= P.cmin) ? '<span class="tag value">VALUE</span>' : '<span class="tag no">cote trop basse</span>';
+    return `<tr><td>${s.n}</td><td class="n">${pct(s.p)}</td><td class="n">${f2(1/s.p)}</td><td>${t}</td></tr>`; }).join('') + '</table><p class="note" style="margin-top:6px">Une forte probabilité n\'est rentable que si la cote du bookmaker dépasse la cote juste.</p>'
+    : '<p class="note">Aucun marché n\'atteint 75 % sur ce match.</p>';
+}
+function drawCharts(){
+  if (typeof Chart === 'undefined') return;
+  Object.values(charts).forEach(c => c.destroy());
+  const r = current, tick = {color:'#e0e0e0'}, grid = {color:'rgba(255,255,255,.08)'};
+  charts.c1 = new Chart($('c1'), {type:'doughnut', data:{labels:['Domicile','Nul','Extérieur'], datasets:[{data:[r.p1,r.px,r.p2].map(x => +(x*100).toFixed(1)), backgroundColor:['rgba(0,212,255,.75)','rgba(255,214,10,.75)','rgba(255,0,110,.75)'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:'#e0e0e0'}}}}});
+  const lab = [0,1,2,3,4,5,6];
+  charts.c2 = new Chart($('c2'), {type:'bar', data:{labels:lab.map(String), datasets:[
+    {label:'Domicile (%)', data:lab.map(k => +(pois(k,r.lh)*100).toFixed(1)), backgroundColor:'rgba(0,212,255,.7)'},
+    {label:'Extérieur (%)', data:lab.map(k => +(pois(k,r.la)*100).toFixed(1)), backgroundColor:'rgba(255,0,110,.7)'}]},
+    options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:'#e0e0e0'}}}, scales:{x:{ticks:tick, grid, title:{display:true, text:'Buts', color:'#9aa4b8'}}, y:{ticks:tick, grid}}}});
+}
+function drawRank(){
+  const ts = MODEL.teams[$('lgRank').value] || [];
+  $('rankT').querySelector('tbody').innerHTML = ts.map(t => `<tr><td>${t.rank}</td><td><b>${esc(t.name)}</b></td><td class="n">${(t.idx>=0?'+':'')+f2(t.idx)}</td><td class="n">${f2(t.ppm)}</td><td class="n">${f2(t.attH)}</td><td class="n">${f2(t.defH)}</td><td class="n">${f2(t.attA)}</td><td class="n">${f2(t.defA)}</td><td class="n">${t.n}</td></tr>`).join('');
+}
+function drawElo(){
+  const c = $('ctrySel').value, q = $('eloSearch').value.trim().toLowerCase();
+  const l = ELO.filter(e => (c === 'Tous les pays' || e.ctry === c) && (!q || e.club.toLowerCase().includes(q))).slice(0, 300);
+  $('eloT').querySelector('tbody').innerHTML = l.map(e => `<tr><td>${e.rank}</td><td><b>${esc(e.club)}</b></td><td>${esc(e.ctry)}</td><td>${esc(e.level)}</td><td class="n">${e.elo}</td><td class="n">${e.crank}</td></tr>`).join('') || '<tr><td colspan="6" class="note">Aucun club.</td></tr>';
+}
+document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === b));
+  ['selection','match','ligue','europe','methode'].forEach(t => $('tab-'+t).classList.toggle('hidden', b.dataset.tab !== t));
+});
+$('modeL').onclick = () => setMode('L'); $('modeE').onclick = () => setMode('E');
+$('go').onclick = analyse;
+init();
+</script>
+</body>
+</html>
