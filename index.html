@@ -187,6 +187,7 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
     <div class="card">
       <h2>Comment sont calculés les pronostics</h2>
       <p><b>Championnat.</b> Pour chaque équipe, on mesure les buts marqués et encaissés à domicile et à l'extérieur, comparés à la moyenne du championnat. Chaque match pèse moins à mesure qu'il vieillit (demi-vie 180 jours). On ajoute 4 matchs « moyens » fictifs pour éviter les extrêmes en début de saison. Buts attendus domicile = attaque domicile × défense extérieure adverse × moyenne de buts à domicile du championnat (et inversement).</p><br>
+      <p><b>Équipes promues.</b> Une équipe qui vient de monter n'a que quelques matchs en 1re division. Pour l'Angleterre, l'Allemagne, l'Italie, l'Espagne, la France et l'Écosse, on reprend aussi ses matchs de 2e division, convertis au niveau supérieur (et comptés à moitié). <span id="promoNote"></span> Pour les autres championnats (pas de 2e division dans nos sources), on part d'un « promu type » au lieu d'une équipe moyenne : le site l'indique par l'étiquette « promu · estimation », et ces matchs sont exclus de la Sélection du jour.</p><br>
       <p><b>Coupe d'Europe.</b> Les clubs viennent de championnats différents, donc on utilise l'Elo. Buts attendus domicile = e<sup>0,445 + 0,195 × écart Elo/100</sup>, extérieur = e<sup>0,234 − 0,192 × écart Elo/100</sup>. Ces coefficients ont été estimés sur 6 829 matchs réels de 20 championnats (régression de Poisson).</p><br>
       <p><b>Scores.</b> Loi de Poisson pour chaque équipe, avec la correction Dixon-Coles des petits scores (0-0, 1-0, 0-1, 1-1). Tous les marchés (1N2, double chance, plus/moins, les deux marquent, but avant 10 minutes) sont tirés de la même grille de scores.</p><br>
       <p class="warn"><b>Important.</b> Aucun pronostic n'est sûr. Une probabilité de 80 % à la cote de 1,20 (probabilité implicite 83 %) fait perdre de l'argent sur la durée. Seuls les paris où la probabilité dépasse nettement 1/cote ont un intérêt. Jeu interdit aux moins de 18 ans. Joue avec modération.</p><br>
@@ -199,8 +200,9 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
 <script>
 "use strict";
 /* ---------- paramètres du modèle (identiques au fichier Excel v4) ---------- */
-const P = {half:180, k:4, rho:-0.05, tmin:10, cmin:1.10, evmin:0.03, psafe:0.75, a:0.445, b:0.195, c:0.234, d:-0.192, fbH:1.45, fbA:1.15};
+const P = {half:180, k:4, rho:-0.05, tmin:10, cmin:1.10, evmin:0.03, psafe:0.75, a:0.445, b:0.195, c:0.234, d:-0.192, fbH:1.45, fbA:1.15, f2:0.5, prior:1};
 const MAIN = {E0:'Angleterre - Premier League',SP1:'Espagne - LaLiga',F1:'France - Ligue 1',I1:'Italie - Serie A',D1:'Allemagne - Bundesliga',B1:'Belgique - Pro League',T1:'Turquie - Süper Lig',SC0:'Écosse - Premiership',G1:'Grèce - Super League',N1:'Pays-Bas - Eredivisie',P1:'Portugal - Liga Portugal'};
+const DIV2 = {E1:'E0', D2:'D1', I2:'I1', SP2:'SP1', F2:'F1', SC1:'SC0'};  // 2e division -> 1re division du même pays
 const NEW = {AUT:'Autriche - Bundesliga',DNK:'Danemark - Superliga',FIN:'Finlande - Veikkausliiga',NOR:'Norvège - Eliteserien',POL:'Pologne - Ekstraklasa',SWZ:'Suisse - Super League',ROU:'Roumanie - Liga 1',SWE:'Suède - Allsvenskan',IRL:'Irlande - Premier Division'};
 const FR = {'Albania':'Albanie','Andorra':'Andorre','Armenia':'Arménie','Austria':'Autriche','Azerbaijan':'Azerbaïdjan','Belarus':'Biélorussie','Belgium':'Belgique','Bosnia and Herzegovina':'Bosnie-Herzégovine','Bulgaria':'Bulgarie','Croatia':'Croatie','Cyprus':'Chypre','Czech Republic':'Tchéquie','Denmark':'Danemark','England':'Angleterre','Estonia':'Estonie','Faroe Islands':'Îles Féroé','Finland':'Finlande','France':'France','Georgia':'Géorgie','Germany':'Allemagne','Gibraltar':'Gibraltar','Greece':'Grèce','Hungary':'Hongrie','Iceland':'Islande','Ireland':'Irlande','Israel':'Israël','Italy':'Italie','Kazakhstan':'Kazakhstan','Kosovo':'Kosovo','Latvia':'Lettonie','Lithuania':'Lituanie','Luxembourg':'Luxembourg','Malta':'Malte','Moldova':'Moldavie','Montenegro':'Monténégro','Netherlands':'Pays-Bas','North Macedonia':'Macédoine du Nord','Northern Ireland':'Irlande du Nord','Norway':'Norvège','Poland':'Pologne','Portugal':'Portugal','Romania':'Roumanie','Russia':'Russie','San Marino':'Saint-Marin','Scotland':'Écosse','Serbia':'Serbie','Slovakia':'Slovaquie','Slovenia':'Slovénie','Spain':'Espagne','Sweden':'Suède','Switzerland':'Suisse','Turkey':'Turquie','Ukraine':'Ukraine','Wales':'Pays de Galles'};
 
@@ -225,6 +227,11 @@ function loadMatches(D){
       for (const r of parseCSV(txt)) {
         if (!r.HG || !r.Home) continue;
         rows.push({date: parseDate(r.Date), lg: NEW[code], season: r.Season, h: r.Home.trim(), a: r.Away.trim(), hg: +r.HG, ag: +r.AG});
+      }
+    } else if (DIV2[code]) {
+      for (const r of parseCSV(txt)) {
+        if (r.FTHG === undefined || r.FTHG === '' || !r.HomeTeam) continue;
+        rows.push({date: parseDate(r.Date), lg: MAIN[DIV2[code]], tier: 2, season: pre, h: r.HomeTeam.trim(), a: r.AwayTeam.trim(), hg: +r.FTHG, ag: +r.FTAG});
       }
     } else if (MAIN[code]) {
       for (const r of parseCSV(txt)) {
@@ -261,39 +268,97 @@ function parseElo(html){
 }
 
 /* ---------- modèle championnat ---------- */
-function buildModel(rows){
+function buildModel(all){
+  // rows = 1res divisions affichées ; rows2 = 2e divisions (servent seulement pour les équipes promues)
+  const rows = all.filter(r => !r.tier), rows2 = all.filter(r => r.tier === 2);
   const dref = Math.max(...rows.map(r => +r.date));
+  const decay = r => Math.exp(-Math.LN2 * Math.max(0, (dref - r.date)/86400000) / P.half);
   const lg = {}, tm = {};
   for (const r of rows) {
-    const w = Math.exp(-Math.LN2 * Math.max(0, (dref - r.date)/86400000) / P.half);
-    const L = lg[r.lg] ||= {w:0, hg:0, ag:0, n:0, cur:new Set(), lastSeason:''};
+    const w = decay(r);
+    const L = lg[r.lg] ||= {w:0, hg:0, ag:0, n:0};
     L.w += w; L.hg += w*r.hg; L.ag += w*r.ag; L.n++;
     const ph = r.hg > r.ag ? 3 : r.hg === r.ag ? 1 : 0, pa = r.ag > r.hg ? 3 : r.hg === r.ag ? 1 : 0;
-    const H = tm[r.lg+'|'+r.h] ||= {lg:r.lg, name:r.h, hw:0, hs:0, hc:0, aw:0, as:0, ac:0, pts:0, n:0};
-    const A = tm[r.lg+'|'+r.a] ||= {lg:r.lg, name:r.a, hw:0, hs:0, hc:0, aw:0, as:0, ac:0, pts:0, n:0};
+    const H = tm[r.lg+'|'+r.h] ||= {lg:r.lg, name:r.h, hw:0, hs:0, hc:0, aw:0, as:0, ac:0, pts:0, n:0, n2:0};
+    const A = tm[r.lg+'|'+r.a] ||= {lg:r.lg, name:r.a, hw:0, hs:0, hc:0, aw:0, as:0, ac:0, pts:0, n:0, n2:0};
     H.hw += w; H.hs += w*r.hg; H.hc += w*r.ag; H.pts += w*ph; H.n++;
     A.aw += w; A.as += w*r.ag; A.ac += w*r.hg; A.pts += w*pa; A.n++;
   }
-  // équipes de la saison en cours = celles qui ont joué la saison la plus récente du championnat
-  const lastSeason = {};
-  for (const r of rows) { if (!lastSeason[r.lg] || r.date > lastSeason[r.lg].date) lastSeason[r.lg] = {season:r.season, date:r.date}; }
-  const curTeams = {};
-  for (const r of rows) if (r.season === lastSeason[r.lg].season) { (curTeams[r.lg] ||= new Set()).add(r.h); curTeams[r.lg].add(r.a); }
   for (const L of Object.keys(lg)) { lg[L].LH = lg[L].hg/lg[L].w; lg[L].LA = lg[L].ag/lg[L].w; }
+  // saisons : la plus récente et la précédente de chaque championnat
+  const seasons = {};
+  for (const r of rows) { const S = seasons[r.lg] ||= {}; if (!S[r.season] || r.date > S[r.season]) S[r.season] = r.date; }
+  const lastSeason = {}, prevSeason = {};
+  for (const [L, S] of Object.entries(seasons)) { const o = Object.keys(S).sort((x,y) => S[y] - S[x]); lastSeason[L] = o[0]; prevSeason[L] = o[1]; }
+  const curTeams = {}, prevTeams = {};
+  for (const r of rows) {
+    if (r.season === lastSeason[r.lg]) { (curTeams[r.lg] ||= new Set()).add(r.h); curTeams[r.lg].add(r.a); }
+    if (r.season === prevSeason[r.lg]) { (prevTeams[r.lg] ||= new Set()).add(r.h); prevTeams[r.lg].add(r.a); }
+  }
+
+  /* ----- équipes promues : saut de niveau 2e -> 1re division, mesuré sur les promus des saisons passées -----
+     Pour chaque promu : force offensive/défensive en 2e division (saison s) et en 1re division (saison s+1),
+     chacune rapportée à la moyenne de buts de sa division. cA et cD = rapport moyen 1re/2e, pondéré par le nombre de matchs. */
+  const seasonStats = (rs) => {   // par championnat|saison : moyennes et stats brutes par équipe
+    const out = {};
+    for (const r of rs) {
+      const K = out[r.lg+'|'+r.season] ||= {n:0, hg:0, ag:0, t:{}};
+      K.n++; K.hg += r.hg; K.ag += r.ag;
+      const H = K.t[r.h] ||= {gf:0, ga:0, nh:0, na:0}, A = K.t[r.a] ||= {gf:0, ga:0, nh:0, na:0};
+      H.gf += r.hg; H.ga += r.ag; H.nh++; A.gf += r.ag; A.ga += r.hg; A.na++;
+    }
+    return out;
+  };
+  const S1 = seasonStats(rows), S2 = seasonStats(rows2);
+  const rel = (K, x) => { const LH = K.hg/K.n, LA = K.ag/K.n;
+    return {att: x.gf/(x.nh*LH + x.na*LA), def: x.ga/(x.nh*LA + x.na*LH), n: x.nh + x.na}; };
+  let sa1 = 0, sa2 = 0, sd1 = 0, sd2 = 0, pa = 0, pd = 0, pw = 0, nProm = 0;
+  for (const [key2, K2] of Object.entries(S2)) {
+    const [L, s2] = key2.split('|');
+    const nxt = Object.keys(S1).filter(k => k.startsWith(L+'|') && k.split('|')[1] > s2).sort()[0];
+    if (!nxt || S1[nxt].n < 20) continue;
+    const K1 = S1[nxt];
+    for (const [name, x2] of Object.entries(K2.t)) {
+      const x1 = K1.t[name]; if (!x1 || x2.nh + x2.na < 10) continue;
+      const r1 = rel(K1, x1), r2 = rel(K2, x2), h = r1.n*r2.n/(r1.n + r2.n);
+      sa1 += h*r1.att; sa2 += h*r2.att; sd1 += h*r1.def; sd2 += h*r2.def;
+      pa += r1.n*r1.att; pd += r1.n*r1.def; pw += r1.n; nProm++;
+    }
+  }
+  const PROMO = nProm >= 6
+    ? {cA: sa1/sa2, cD: sd1/sd2, att: pa/pw, def: pd/pw, n: nProm}
+    : {cA: 0.75, cD: 1.30, att: 0.80, def: 1.20, n: 0};   // valeurs de secours si pas assez de promus
+  // moyennes (pondérées) des 2e divisions
+  const lg2 = {};
+  for (const r of rows2) { const w = decay(r); const L = lg2[r.lg] ||= {w:0, hg:0, ag:0}; L.w += w; L.hg += w*r.hg; L.ag += w*r.ag; }
+  for (const L of Object.values(lg2)) { L.LH = L.hg/L.w; L.LA = L.ag/L.w; }
+  // matchs de 2e division des équipes actuellement en 1re division, convertis au niveau 1re division (poids P.f2)
+  for (const r of rows2) {
+    const L1 = lg[r.lg], L2 = lg2[r.lg]; if (!L1 || !curTeams[r.lg]) continue;
+    const w = decay(r) * P.f2;
+    const H = curTeams[r.lg].has(r.h) && tm[r.lg+'|'+r.h], A = curTeams[r.lg].has(r.a) && tm[r.lg+'|'+r.a];
+    if (H) { H.hw += w; H.hs += w*(r.hg/L2.LH)*PROMO.cA*L1.LH; H.hc += w*(r.ag/L2.LA)*PROMO.cD*L1.LA; H.n2++; }
+    if (A) { A.aw += w; A.as += w*(r.ag/L2.LA)*PROMO.cA*L1.LA; A.ac += w*(r.hg/L2.LH)*PROMO.cD*L1.LH; A.n2++; }
+  }
+
   const teams = {};
   for (const t of Object.values(tm)) {
     if (!curTeams[t.lg] || !curTeams[t.lg].has(t.name)) continue;
     const {LH, LA} = lg[t.lg], k = P.k;
-    t.attH = ((t.hs + k*LH)/(t.hw + k))/LH;
-    t.defH = ((t.hc + k*LA)/(t.hw + k))/LA;
-    t.attA = ((t.as + k*LA)/(t.aw + k))/LA;
-    t.defA = ((t.ac + k*LH)/(t.aw + k))/LH;
+    // promu sans historique de 2e division disponible : on part d'un "promu type" plutôt que de la moyenne du championnat
+    t.promu = !!(prevTeams[t.lg] && prevTeams[t.lg].size && !prevTeams[t.lg].has(t.name));
+    const pA = P.prior && t.promu && !t.n2 ? PROMO.att : 1, pD = P.prior && t.promu && !t.n2 ? PROMO.def : 1;
+    t.attH = ((t.hs + k*pA*LH)/(t.hw + k))/LH;
+    t.defH = ((t.hc + k*pD*LA)/(t.hw + k))/LA;
+    t.attA = ((t.as + k*pA*LA)/(t.aw + k))/LA;
+    t.defA = ((t.ac + k*pD*LH)/(t.aw + k))/LH;
     t.idx = (t.attH*LH - t.defH*LA + t.attA*LA - t.defA*LH)/2;
     t.ppm = (t.hw + t.aw) > 0 ? t.pts/(t.hw + t.aw) : 0;
+    t.neff = t.n + Math.round(P.f2 * t.n2);
     (teams[t.lg] ||= []).push(t);
   }
   for (const L of Object.keys(teams)) { teams[L].sort((x,y) => y.idx - x.idx); teams[L].forEach((t,i) => t.rank = i+1); }
-  return {lg, teams, dref: new Date(dref)};
+  return {lg, teams, dref: new Date(dref), promo: PROMO};
 }
 
 /* ---------- grille des scores et marchés ---------- */
@@ -356,7 +421,7 @@ function buildUpcoming(D){
   for (const u of UPCOMING) {
     const L = MODEL.lg[u.lg];
     u.r = markets(u.H.attH*u.A.defA*L.LH, u.A.attA*u.H.defH*L.LA);
-    u.n = Math.min(u.H.n, u.A.n);
+    u.n = Math.min(u.H.neff, u.A.neff);
     u.cands = u.r.list.map(([nm,p]) => {
       const k = OK_KEYS[nm]; const o = u.odds && k && +u.odds[k] > 1 ? +u.odds[k] : null;
       return {nm, p, o, ev: o ? p*o - 1 : null, g: recoGroup(nm)};
@@ -394,7 +459,7 @@ function drawSelection(){
   // table complète
   $('selT').querySelector('tbody').innerHTML = list.map((u,i) => {
     const b = u.cands.filter(x => x.g && x.p >= 0.58 && x.p < 0.92).sort((a,b) => b.p - a.p)[0];
-    return `<tr><td>${dstr(u)}</td><td><b>${esc(u.H.name)} – ${esc(u.A.name)}</b>${u.n < 15 ? ' <span class="tag weak">peu de données</span>' : ''}</td><td>${esc(u.lg)}</td><td class="n">${pct(u.r.p1)}</td><td class="n">${pct(u.r.px)}</td><td class="n">${pct(u.r.p2)}</td><td class="n">${f2(u.r.lh)} – ${f2(u.r.la)}</td><td>${b ? b.nm + ' (' + pct(b.p) + ')' : '<span class="note">—</span>'}</td><td><button class="tab" style="padding:4px 10px;font-size:.8em" data-open="${UPCOMING.indexOf(u)}">Détail</button></td></tr>`;
+    return `<tr><td>${dstr(u)}</td><td><b>${esc(u.H.name)} – ${esc(u.A.name)}</b>${u.n < 15 ? ' <span class="tag weak" title="Équipe promue sans historique de 2e division disponible : estimation à partir d\'un promu type">promu · estimation</span>' : ''}</td><td>${esc(u.lg)}</td><td class="n">${pct(u.r.p1)}</td><td class="n">${pct(u.r.px)}</td><td class="n">${pct(u.r.p2)}</td><td class="n">${f2(u.r.lh)} – ${f2(u.r.la)}</td><td>${b ? b.nm + ' (' + pct(b.p) + ')' : '<span class="note">—</span>'}</td><td><button class="tab" style="padding:4px 10px;font-size:.8em" data-open="${UPCOMING.indexOf(u)}">Détail</button></td></tr>`;
   }).join('') || '<tr><td colspan="9" class="note">Aucun match.</td></tr>';
   document.querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => openMatch(UPCOMING[+btn.dataset.open]));
 }
@@ -413,6 +478,7 @@ function init(){
   if (!D) { $('noData').classList.remove('hidden'); return; }
   const rows = loadMatches(D);
   MODEL = buildModel(rows);
+  { const q = MODEL.promo, g = x => x.toFixed(2).replace('.',','); $('promoNote').textContent = q.n ? `Le saut de niveau est mesuré sur ${q.n} promus réels des saisons passées : en montant, une équipe garde en moyenne ${Math.round(q.cA*100)} % de son efficacité offensive de 2e division, et encaisse ${g(q.cD)} fois plus de buts.` : ''; }
   ELO = parseElo(D.elo_html);
   const leagues = Object.keys(MAIN).map(k => MAIN[k]).concat(Object.keys(NEW).map(k => NEW[k])).filter(l => MODEL.teams[l]);
   $('badges').innerHTML = `<span class="badge">${rows.length.toLocaleString('fr-FR')} matchs</span><span class="badge pink">${leagues.length} championnats</span><span class="badge green">${ELO.length.toLocaleString('fr-FR')} clubs Elo</span><span class="badge gold">Données du ${esc(D.maj)} · dernier match ${MODEL.dref.toLocaleDateString('fr-FR',{timeZone:'UTC'})}</span>`;
