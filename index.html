@@ -80,7 +80,7 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
 <body>
 <div class="header">
   <h1>⚽ AZETO PRONOS</h1>
-  <p>Pronostics calculés sur les vrais résultats · championnats et coupes d'Europe</p>
+  <p>Pronostics calculés sur les vrais résultats · championnats, coupes d'Europe et sélections nationales</p>
   <div class="badges" id="badges"></div>
 </div>
 <div class="container">
@@ -92,6 +92,7 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
     <button class="tab" data-tab="match">📊 Analyser un match</button>
     <button class="tab" data-tab="ligue">🏆 Classement championnat</button>
     <button class="tab" data-tab="europe">🌍 Classement Europe (Elo)</button>
+    <button class="tab" data-tab="nations">🌐 Sélections nationales</button>
     <button class="tab" data-tab="methode">ℹ️ Méthode</button>
   </div>
 
@@ -117,7 +118,7 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
   <!-- MATCH -->
   <section id="tab-match" class="hidden">
     <div class="card">
-      <div class="seg"><button id="modeL" class="active">Championnat</button><button id="modeE">Coupe d'Europe</button></div>
+      <div class="seg"><button id="modeL" class="active">Championnat</button><button id="modeE">Coupe d'Europe</button><button id="modeN">Sélections</button></div>
       <div id="formL">
         <label>Championnat</label><select id="lgSel"></select>
         <div class="grid2">
@@ -133,6 +134,15 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
           <div class="ac"><label>Club à l'extérieur</label><input id="eA" autocomplete="off" placeholder="ex. Slavia Praha"><div class="ac-list hidden" id="eAl"></div><div class="stats" id="eAs"></div></div>
         </div>
         <label><input type="checkbox" id="neutral" style="width:auto"> Terrain neutre (finale)</label>
+      </div>
+      <div id="formN" class="hidden">
+        <label>Compétition</label>
+        <select id="nComp"><option data-n="1">CAN (phase finale)</option><option data-n="0">Qualifications CAN</option><option data-n="1">Coupe du monde (phase finale)</option><option data-n="0">Qualifications Coupe du monde</option><option data-n="1">Euro (phase finale)</option><option data-n="0">Qualifications Euro</option><option data-n="0">Ligue des nations</option><option data-n="1">Copa América</option><option data-n="1">Coupe d'Asie</option><option data-n="1">Gold Cup</option><option data-n="0">Match amical</option></select>
+        <div class="grid2">
+          <div><label>Équipe 1 (à domicile, ou nommée en premier)</label><select id="nH"></select><div class="stats" id="nHs"></div></div>
+          <div><label>Équipe 2</label><select id="nA"></select><div class="stats" id="nAs"></div></div>
+        </div>
+        <label><input type="checkbox" id="nNeutral" style="width:auto" checked> Terrain neutre (décoche si l'équipe 1 joue vraiment chez elle, ex. pays organisateur)</label>
       </div>
       <div class="grid2">
         <div><label>Ajustement contexte domicile (%) : absences, enjeu, fatigue</label><input type="number" id="adjH" value="0" step="5"></div>
@@ -184,6 +194,16 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
     </div>
   </section>
 
+  <!-- SELECTIONS -->
+  <section id="tab-nations" class="hidden">
+    <div class="card">
+      <h2>Classement mondial des sélections (Elo)</h2>
+      <div class="grid2"><div><label>Continent</label><select id="confSel"></select></div><div><label>Rechercher un pays</label><input id="nSearch" placeholder="ex. Bénin"></div></div>
+      <p class="note" style="margin-top:8px" id="nNote"></p>
+      <div class="tablewrap"><table id="nT"><thead><tr><th>Monde</th><th>Sélection</th><th>Continent</th><th class="n">Rang cont.</th><th class="n">Elo</th><th>5 derniers</th><th>Dernier match</th></tr></thead><tbody></tbody></table></div>
+    </div>
+  </section>
+
   <!-- METHODE -->
   <section id="tab-methode" class="hidden">
     <div class="card">
@@ -191,6 +211,7 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
       <p><b>Championnat.</b> Pour chaque équipe, on mesure les buts marqués et encaissés à domicile et à l'extérieur, comparés à la moyenne du championnat. Chaque match pèse moins à mesure qu'il vieillit (demi-vie 180 jours). On ajoute 4 matchs « moyens » fictifs pour éviter les extrêmes en début de saison. Buts attendus domicile = attaque domicile × défense extérieure adverse × moyenne de buts à domicile du championnat (et inversement).</p><br>
       <p><b>Équipes promues.</b> Une équipe qui vient de monter n'a que quelques matchs en 1re division. Pour l'Angleterre, l'Allemagne, l'Italie, l'Espagne, la France et l'Écosse, on reprend aussi ses matchs de 2e division, convertis au niveau supérieur (et comptés à moitié). <span id="promoNote"></span> Pour les autres championnats (pas de 2e division dans nos sources), on part d'un « promu type » au lieu d'une équipe moyenne : le site l'indique par l'étiquette « promu · estimation », et ces matchs sont exclus de la Sélection du jour.</p><br>
       <p><b>Coupe d'Europe.</b> Les clubs viennent de championnats différents, donc on utilise l'Elo. Buts attendus domicile = e<sup>0,445 + 0,195 × écart Elo/100</sup>, extérieur = e<sup>0,234 − 0,192 × écart Elo/100</sup>. Ces coefficients ont été estimés sur 6 829 matchs réels de 20 championnats (régression de Poisson).</p><br>
+      <p><b>Sélections nationales.</b> On calcule un classement Elo mondial sur tous les matchs internationaux joués depuis 1872 (même méthode que eloratings.net : un match de Coupe du monde compte plus qu'un amical, une large victoire plus qu'une courte). Buts attendus = e<sup>a + b × écart Elo/100</sup>, avec un bonus pour l'équipe qui reçoit, un effet qui s'atténue pour les très gros écarts et un léger ajustement pour les amicaux ; coefficients estimés par régression de Poisson sur les matchs depuis 2014. <b>Test honnête</b> (modèle calé sur 2010-2023, testé sur 3 018 matchs de janvier 2024 à octobre 2026) : le « pari sécurité » annoncé en moyenne à 83 % est passé 82 % du temps (84 % en phases finales : CAN, Euro, Copa América, Coupe d'Asie, Coupe du monde). Source : github.com/martj42/international_results. Limite : la source ne publie pas le calendrier à venir, il faut choisir les deux équipes soi-même.</p><br>
       <p><b>Scores.</b> Loi de Poisson pour chaque équipe, avec la correction Dixon-Coles des petits scores (0-0, 1-0, 0-1, 1-1). Tous les marchés (1N2, double chance, plus/moins, les deux marquent, but avant 10 minutes) sont tirés de la même grille de scores.</p><br>
       <p class="warn"><b>Important.</b> Aucun pronostic n'est sûr. Une probabilité de 80 % à la cote de 1,20 (probabilité implicite 83 %) fait perdre de l'argent sur la durée. Seuls les paris où la probabilité dépasse nettement 1/cote ont un intérêt. Jeu interdit aux moins de 18 ans. Joue avec modération.</p><br>
       <p class="note" id="srcNote"></p>
@@ -483,7 +504,7 @@ function init(){
   { const q = MODEL.promo, g = x => x.toFixed(2).replace('.',','); $('promoNote').textContent = q.n ? `Le saut de niveau est mesuré sur ${q.n} promus réels des saisons passées : en montant, une équipe garde en moyenne ${Math.round(q.cA*100)} % de son efficacité offensive de 2e division, et encaisse ${g(q.cD)} fois plus de buts.` : ''; }
   ELO = parseElo(D.elo_html);
   const leagues = Object.keys(MAIN).map(k => MAIN[k]).concat(Object.keys(NEW).map(k => NEW[k])).filter(l => MODEL.teams[l]);
-  $('badges').innerHTML = `<span class="badge">${rows.length.toLocaleString('fr-FR')} matchs</span><span class="badge pink">${leagues.length} championnats</span><span class="badge green">${ELO.length.toLocaleString('fr-FR')} clubs Elo</span><span class="badge gold">Données du ${esc(D.maj)} · dernier match ${MODEL.dref.toLocaleDateString('fr-FR',{timeZone:'UTC'})}</span>`;
+  $('badges').innerHTML = `<span class="badge">${rows.length.toLocaleString('fr-FR')} matchs</span><span class="badge pink">${leagues.length} championnats</span><span class="badge green">${ELO.length.toLocaleString('fr-FR')} clubs Elo</span>${D.intl && D.intl.teams ? `<span class="badge">${D.intl.teams.length} sélections</span>` : ''}<span class="badge gold">Données du ${esc(D.maj)} · dernier match ${MODEL.dref.toLocaleDateString('fr-FR',{timeZone:'UTC'})}</span>`;
   $('srcNote').textContent = `Sources : résultats football-data.co.uk, Elo clubelo.com. Dernière mise à jour : ${D.maj}.`;
   const opts = leagues.map(l => `<option>${esc(l)}</option>`).join('');
   $('lgSel').innerHTML = opts; $('lgRank').innerHTML = opts;
@@ -494,6 +515,7 @@ function init(){
   $('ctrySel').onchange = drawElo; $('eloSearch').oninput = drawElo; drawElo();
   setupAC('eH','eHl','eHs'); setupAC('eA','eAl','eAs');
   buildUpcoming(D); $('selDays').onchange = drawSelection; $('selLg').onchange = drawSelection; drawSelection();
+  initIntl(D);
   if (!ELO.length) $('modeE').title = "Elo indisponible : relance la mise à jour";
 }
 function fillTeams(){
@@ -528,8 +550,36 @@ function setupAC(inp, list, stats){
   document.addEventListener('click', ev => { if (ev.target !== I) Lst.classList.add('hidden'); });
 }
 function setMode(m){
-  mode = m; $('modeL').classList.toggle('active', m==='L'); $('modeE').classList.toggle('active', m==='E');
-  $('formL').classList.toggle('hidden', m!=='L'); $('formE').classList.toggle('hidden', m!=='E');
+  mode = m;
+  for (const k of ['L','E','N']) { $('mode'+k).classList.toggle('active', m===k); $('form'+k).classList.toggle('hidden', m!==k); }
+}
+/* ---------- sélections nationales ---------- */
+let INTL = null;
+const FORMC = {V:'var(--success)', N:'var(--warning)', D:'var(--secondary)'};
+const formHtml = f => f.map(x => `<b style="color:${FORMC[x.r]}" title="${esc(x.d)} · ${esc(x.o)} ${esc(x.s)} · ${esc(x.c)}">${x.r}</b>`).join(' ');
+function intlLambdas(eh, ea, neutral, friendly){ const p = INTL.p, d = p.S*Math.tanh((eh - ea)/100/p.S), h = neutral ? 0 : 1, f = friendly ? p.f : 0; return [Math.exp(p.a + p.b*d + p.h*h + f), Math.exp(p.a - p.b*d + p.g*h + f)]; }
+function initIntl(D){
+  INTL = D.intl;
+  if (!INTL || !INTL.teams || !INTL.teams.length) { $('modeN').title = 'Données des sélections indisponibles : relance la mise à jour'; $('nNote').textContent = 'Données des sélections indisponibles pour le moment.'; return; }
+  const confs = ['Afrique','Europe','Amérique du Sud','Amérique du Nord et centrale','Asie','Océanie'].filter(c => INTL.teams.some(t => t.conf === c));
+  const opt = confs.map(c => `<optgroup label="${c}">` + INTL.teams.filter(t => t.conf === c).sort((a,b) => a.fr.localeCompare(b.fr,'fr')).map(t => `<option value="${INTL.teams.indexOf(t)}">${esc(t.fr)}</option>`).join('') + '</optgroup>').join('');
+  $('nH').innerHTML = opt; $('nA').innerHTML = opt;
+  const idx = n => String(INTL.teams.findIndex(t => t.n === n));
+  $('nH').value = idx('Benin'); $('nA').value = idx('Nigeria');
+  const show = side => { const t = INTL.teams[+$(side).value]; if (!t) return;
+    $(side+'s').innerHTML = [['Elo', t.elo], ['Rang mondial', t.rank], ['Rang ' + (t.conf === 'Afrique' ? 'Afrique' : 'continent'), t.crank], ['Forme', formHtml(t.form)]].map(([l,v]) => `<div class="stat"><div class="v">${v}</div><div class="l">${l}</div></div>`).join(''); };
+  $('nH').onchange = () => show('nH'); $('nA').onchange = () => show('nA'); show('nH'); show('nA');
+  $('nComp').onchange = () => { $('nNeutral').checked = $('nComp').selectedOptions[0].dataset.n === '1'; };
+  $('confSel').innerHTML = '<option>Monde</option>' + confs.map(c => `<option>${c}</option>`).join(''); $('confSel').value = 'Afrique';
+  $('confSel').onchange = drawNations; $('nSearch').oninput = drawNations; drawNations();
+  const [y,m,d] = INTL.last.split('-');
+  $('nNote').textContent = `${INTL.n.toLocaleString('fr-FR')} matchs internationaux depuis 1872, dernier match enregistré le ${d}/${m}/${y}. Elo : +100 points d'écart ≈ 64 % de chances de gagner sur terrain neutre. Forme : V victoire, N nul, D défaite, du plus ancien au plus récent ; survole (ou touche) une lettre pour voir le match.`;
+}
+function drawNations(){
+  const c = $('confSel').value, q = $('nSearch').value.trim().toLowerCase();
+  const l = INTL.teams.filter(t => (c === 'Monde' || t.conf === c) && (!q || t.fr.toLowerCase().includes(q) || t.n.toLowerCase().includes(q)));
+  $('nT').querySelector('tbody').innerHTML = l.map(t => { const f = t.form[t.form.length-1]; const [y,m,d] = f.d.split('-');
+    return `<tr${t.n === 'Benin' ? ' style="background:rgba(0,212,255,.08)"' : ''}><td>${t.rank}</td><td><b>${esc(t.fr)}</b></td><td>${esc(t.conf)}</td><td class="n">${t.crank}</td><td class="n">${t.elo}</td><td style="white-space:nowrap">${formHtml(t.form)}</td><td class="note">${d}/${m}/${y} · ${esc(f.o)} ${esc(f.s)} (${esc(f.c)})</td></tr>`; }).join('') || '<tr><td colspan="7" class="note">Aucune sélection.</td></tr>';
 }
 function analyse(){
   const adjH = 1 + (+$('adjH').value||0)/100, adjA = 1 + (+$('adjA').value||0)/100;
@@ -542,7 +592,7 @@ function analyse(){
     title = `${H.name} – ${A.name} · ${L}`;
     REL = Math.min(H.n, A.n) >= 15 ? 'bonne' : Math.min(H.n, A.n) >= 6 ? 'moyenne' : 'faible'; NAMES = [H.name, A.name];
     if (Math.min(H.n, A.n) < 6) warn = 'Attention : moins de 6 matchs pour une équipe, résultat peu fiable.';
-  } else {
+  } else if (mode === 'E') {
     const hi = $('eH').dataset.sel, ai = $('eA').dataset.sel;
     if (hi === '' || ai === '' || hi === undefined || ai === undefined || hi === ai) { $('check').textContent = 'Choisis deux clubs différents dans les listes.'; return; }
     const H = ELO[+hi], A = ELO[+ai], dr = H.elo - A.elo, neutral = $('neutral').checked;
@@ -550,6 +600,13 @@ function analyse(){
     lh = Math.exp(ka + P.b*dr/100) * adjH; la = Math.exp(kc + P.d*dr/100) * adjA;
     title = `${H.club} – ${A.club} · ${$('compSel').value}${neutral ? ' (terrain neutre)' : ''}`;
     REL = 'moyenne'; NAMES = [H.club, A.club];
+  } else {
+    if (!INTL) { $('check').textContent = 'Données des sélections indisponibles.'; return; }
+    const H = INTL.teams[+$('nH').value], A = INTL.teams[+$('nA').value], neutral = $('nNeutral').checked;
+    if (!H || !A || H === A) { $('check').textContent = 'Choisis deux sélections différentes.'; return; }
+    [lh, la] = intlLambdas(H.elo, A.elo, neutral, $('nComp').value === 'Match amical'); lh *= adjH; la *= adjA;
+    title = `${H.fr} – ${A.fr} · ${$('nComp').value}${neutral ? ' (terrain neutre)' : ''}`;
+    REL = 'bonne'; NAMES = [H.fr, A.fr];
   }
   $('check').textContent = warn;
   current = markets(lh, la);
@@ -650,9 +707,9 @@ function drawElo(){
 }
 document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
   document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === b));
-  ['selection','match','ligue','europe','methode'].forEach(t => $('tab-'+t).classList.toggle('hidden', b.dataset.tab !== t));
+  ['selection','match','ligue','europe','nations','methode'].forEach(t => $('tab-'+t).classList.toggle('hidden', b.dataset.tab !== t));
 });
-$('modeL').onclick = () => setMode('L'); $('modeE').onclick = () => setMode('E');
+$('modeL').onclick = () => setMode('L'); $('modeE').onclick = () => setMode('E'); $('modeN').onclick = () => setMode('N');
 $('go').onclick = analyse;
 init();
 </script>

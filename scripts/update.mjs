@@ -3,6 +3,7 @@
 // puis écrit data/donnees.js. Si une source échoue, la copie précédente (data/raw) est gardée.
 import fs from 'node:fs';
 import path from 'node:path';
+import { buildIntl, frIntl } from './intl.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..');
 const RAW = path.join(ROOT, 'data', 'raw');
@@ -77,9 +78,24 @@ let elo_html = read(eloDest) || '';
 const i = elo_html.indexOf('<div class="accordion-item">');
 elo_html = i >= 0 ? elo_html.slice(i) : '';
 
+// Sélections nationales : tous les matchs internationaux depuis 1872 (martj42/international_results)
+let intl = null;
+{
+  const base = 'https://raw.githubusercontent.com/martj42/international_results/master/';
+  const fR = path.join(RAW, 'intl_results.csv'), fN = path.join(RAW, 'intl_former_names.csv');
+  await get(base + 'results.csv', fR); await get(base + 'former_names.csv', fN);
+  try {
+    if (read(fR) && read(fN)) {
+      const I = frIntl(buildIntl(read(fR), read(fN)));
+      const r4 = x => Math.round(x * 1e4) / 1e4;
+      intl = { last: I.last, n: I.nMatches, p: { a: r4(I.params.a), b: r4(I.params.b), h: r4(I.params.h), g: r4(I.params.g), f: r4(I.params.f), S: I.params.S }, teams: I.teams };
+    }
+  } catch (e) { console.log('Sélections : erreur ' + e.message); }
+}
+
 const pad = n => String(n).padStart(2, '0');
 const local = new Date(now.getTime() + 60 * 60 * 1000); // heure du Bénin (UTC+1)
 const maj = `${pad(local.getUTCDate())}/${pad(local.getUTCMonth() + 1)}/${local.getUTCFullYear()} ${pad(local.getUTCHours())}:${pad(local.getUTCMinutes())}`;
 const out = path.join(ROOT, 'data', 'donnees.js');
-fs.writeFileSync(out, 'window.AZ_DATA = ' + JSON.stringify({ maj, saison: cur, files, calendrier, elo_html }) + ';');
-console.log(`OK : donnees.js ${Math.round(fs.statSync(out).size / 1024)} Ko, ${Object.keys(files).length} fichiers, ${calendrier.length} matchs au calendrier, Elo ${elo_html ? 'OK' : 'absent'}`);
+fs.writeFileSync(out, 'window.AZ_DATA = ' + JSON.stringify({ maj, saison: cur, files, calendrier, elo_html, intl }) + ';');
+console.log(`OK : donnees.js ${Math.round(fs.statSync(out).size / 1024)} Ko, ${Object.keys(files).length} fichiers, ${calendrier.length} matchs au calendrier, Elo ${elo_html ? 'OK' : 'absent'}, ${intl ? intl.teams.length + ' sélections (dernier match ' + intl.last + ')' : 'sélections absentes'}`);
