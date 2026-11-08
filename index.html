@@ -11,115 +11,241 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>document.write('<script src="data/donnees.js?v=' + Date.now() + '"><\/script>');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-:root{--primary:#00d4ff;--secondary:#ff006e;--success:#00e676;--warning:#ffd60a;--dark:#0f0f1e;--darker:#1a1a2e;--card:#16213e;--text:#e0e0e0;--muted:#9aa4b8;--line:rgba(255,255,255,.08)}
-body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,var(--dark) 0%,var(--darker) 100%);color:var(--text);line-height:1.5;min-height:100vh}
-.header{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border-bottom:3px solid var(--primary);padding:18px 16px;text-align:center;box-shadow:0 4px 15px rgba(0,212,255,.2)}
-.header h1{color:var(--primary);font-size:2em;text-shadow:0 0 20px rgba(0,212,255,.5)}
-.header p{font-size:.92em;color:var(--muted)}
-.badges{margin-top:10px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.badge{padding:5px 12px;border-radius:20px;font-size:.8em;font-weight:bold;background:var(--primary);color:var(--dark)}
-.badge.pink{background:var(--secondary);color:#fff}.badge.green{background:var(--success)}.badge.gold{background:var(--warning);color:var(--dark)}
-.container{max-width:1300px;margin:0 auto;padding:16px}
-.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
-.tab{padding:10px 18px;border-radius:8px;background:var(--card);border:1px solid var(--line);color:var(--text);cursor:pointer;font-weight:bold;font-size:.95em}
-.tab.active{background:var(--primary);color:var(--dark)}
+:root{
+  --bg:#0a1020;--surface:#111a2e;--surface2:#16223b;--field:#0d1628;--line:rgba(148,163,184,.14);--line2:rgba(148,163,184,.24);
+  --text:#e8eef8;--muted:#93a1b8;--brand:#16c784;--brand2:#0fa36b;--gold:#f5b301;--red:#f0475c;--blue:#3b82f6;--violet:#8b5cf6;--orange:#f97316;
+  --primary:var(--brand);--secondary:var(--red);--success:#22d38a;--warning:var(--gold);--accent:var(--brand);
+  --radius:14px;--shadow:0 10px 30px rgba(0,0,0,.25);--side:256px;
+}
+html{scroll-behavior:smooth}
+body{font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
 .hidden{display:none!important}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:18px;margin-bottom:16px}
-.card h2{color:var(--primary);font-size:1.2em;margin-bottom:12px}
-.card h3{color:var(--warning);font-size:1em;margin:4px 0 10px}
+/* barre du haut */
+.topbar{position:sticky;top:0;z-index:40;height:62px;display:flex;align-items:center;gap:12px;padding:0 18px;background:rgba(10,16,32,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed',Inter,sans-serif;font-weight:800;font-size:1.45em;letter-spacing:.04em}
+.brand .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),#0b7d55);display:grid;place-items:center;box-shadow:0 0 0 1px rgba(255,255,255,.08) inset}
+.brand b{color:var(--brand)}
+.topbar .sp{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:.78em;font-weight:600;background:var(--surface2);border:1px solid var(--line);color:var(--muted)}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:var(--brand);box-shadow:0 0 0 3px rgba(22,199,132,.2)}
+.burger{display:none;background:none;border:1px solid var(--line2);color:var(--text);border-radius:10px;width:40px;height:40px;cursor:pointer;place-items:center}
+/* structure */
+.app{display:grid;grid-template-columns:var(--side) 1fr;min-height:calc(100vh - 62px);background:linear-gradient(90deg,#0c1324 var(--side),transparent var(--side))}
+.side{position:sticky;top:62px;height:calc(100vh - 62px);overflow-y:auto;border-right:1px solid var(--line);background:#0c1324;padding:18px 12px}
+.side .grp{font-size:.7em;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin:16px 12px 6px}
+.side .grp:first-child{margin-top:0}
+.nav{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:#c3cddc;font-weight:500;font-size:.94em;cursor:pointer;border:1px solid transparent;transition:background .15s,color .15s}
+.nav svg{width:19px;height:19px;flex:none;opacity:.85}
+.nav:hover{background:var(--surface);color:#fff}
+.nav.active{background:linear-gradient(90deg,rgba(22,199,132,.16),rgba(22,199,132,.04));color:#fff;border-color:rgba(22,199,132,.25)}
+.nav.active svg{color:var(--brand);opacity:1}
+.nav .soon{margin-left:auto;font-size:.68em;font-weight:700;color:var(--gold);border:1px solid rgba(245,179,1,.4);border-radius:6px;padding:1px 6px}
+.side .legal{margin:22px 12px 0;font-size:.72em;color:#64748b;line-height:1.5}
+.main{min-width:0;padding:22px 26px 40px}
+.wrap{max-width:1180px;margin:0 auto}
+.overlay{display:none}
+.bottomnav{display:none}
+/* en-tête de page */
+.page-hero{position:relative;overflow:hidden;border-radius:18px;padding:22px 24px;margin-bottom:18px;border:1px solid var(--line);background:
+  radial-gradient(600px 200px at 0% 0%,color-mix(in srgb,var(--accent) 30%,transparent),transparent 70%),
+  linear-gradient(135deg,var(--surface2),var(--surface));display:flex;gap:16px;align-items:center}
+.page-hero:after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;border:28px solid color-mix(in srgb,var(--accent) 14%,transparent)}
+.page-hero .ic{width:52px;height:52px;flex:none;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--accent) 20%,transparent);color:var(--accent);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+.page-hero .ic svg{width:26px;height:26px}
+.page-hero h1{font-family:'Barlow Condensed',Inter,sans-serif;font-weight:800;font-size:1.9em;letter-spacing:.02em;line-height:1.05;text-transform:uppercase}
+.page-hero p{color:var(--muted);font-size:.95em;margin-top:4px;max-width:720px}
+.page-hero .eyebrow{font-size:.72em;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent)}
+/* cartes */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:16px}
+.card h2{font-size:1.08em;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:#fff}
+.card h2:before{content:"";width:4px;height:18px;border-radius:2px;background:var(--accent)}
+.card h3{color:var(--gold);font-size:.95em;margin:4px 0 10px}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-@media(max-width:800px){.grid2,.grid3{grid-template-columns:1fr}.header h1{font-size:1.5em}}
-label{display:block;font-size:.85em;color:var(--muted);margin:8px 0 4px}
-select,input{width:100%;padding:10px;border-radius:8px;border:1px solid #2c3a5a;background:#0f1a30;color:var(--text);font-size:.95em}
-input.odd{width:80px;padding:6px;text-align:center}
-.seg{display:flex;gap:0;margin-bottom:10px}
-.seg button{flex:1;padding:10px;border:1px solid #2c3a5a;background:#0f1a30;color:var(--text);cursor:pointer;font-weight:bold}
-.seg button:first-child{border-radius:8px 0 0 8px}.seg button:last-child{border-radius:0 8px 8px 0}
-.seg button.active{background:var(--secondary);color:#fff;border-color:var(--secondary)}
-.btn{margin-top:14px;width:100%;padding:14px;border:none;border-radius:10px;background:linear-gradient(90deg,var(--primary),#0090ff);color:var(--dark);font-weight:bold;font-size:1.05em;cursor:pointer}
+label{display:block;font-size:.8em;font-weight:600;color:var(--muted);margin:10px 0 6px}
+select,input{width:100%;padding:11px 12px;border-radius:10px;border:1px solid var(--line2);background:var(--field);color:var(--text);font:inherit;font-size:.95em;outline:none}
+select:focus,input:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 22%,transparent)}
+input[type=checkbox]{accent-color:var(--brand)}
+input.odd{width:84px;padding:7px;text-align:center}
+.seg{display:flex;padding:4px;gap:4px;background:var(--field);border:1px solid var(--line);border-radius:12px;margin-bottom:8px}
+.seg button{flex:1;padding:10px 8px;border:none;background:transparent;color:var(--muted);cursor:pointer;font:inherit;font-weight:600;border-radius:9px}
+.seg button.active{background:var(--accent);color:#04130c}
+.btn{margin-top:16px;width:100%;padding:14px;border:none;border-radius:12px;background:linear-gradient(90deg,var(--brand),var(--brand2));color:#04130c;font:inherit;font-weight:800;font-size:1em;letter-spacing:.03em;cursor:pointer;box-shadow:0 8px 20px rgba(22,199,132,.25)}
+.btn:hover{filter:brightness(1.06)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line2);box-shadow:none}
+.mini-btn{padding:5px 12px;border-radius:8px;border:1px solid var(--line2);background:var(--surface2);color:var(--text);font:inherit;font-size:.8em;font-weight:600;cursor:pointer}
+.mini-btn:hover{border-color:var(--brand);color:var(--brand)}
 .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
-.stat{background:#0f1a30;border-radius:8px;padding:8px;text-align:center}
-.stat .v{font-size:1.2em;font-weight:bold;color:var(--primary)}.stat .l{font-size:.75em;color:var(--muted)}
+.stat{background:var(--field);border:1px solid var(--line);border-radius:10px;padding:9px;text-align:center}
+.stat .v{font-size:1.15em;font-weight:700;color:var(--accent)}.stat .l{font-size:.72em;color:var(--muted)}
 .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-@media(max-width:800px){.kpis{grid-template-columns:repeat(2,1fr)}}
-.kpi{background:#0f1a30;border-radius:10px;padding:12px;text-align:center}
-.kpi .v{font-size:1.6em;font-weight:bold}.kpi .l{font-size:.8em;color:var(--muted)}
+.kpi{background:var(--field);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+.kpi .v{font-size:1.5em;font-weight:800}.kpi .l{font-size:.78em;color:var(--muted)}
 table{width:100%;border-collapse:collapse;font-size:.9em}
-th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left}
-th{color:var(--primary);font-weight:600;font-size:.82em;text-transform:uppercase;letter-spacing:.03em}
-td.n,th.n{text-align:right}
-tr.safe td:first-child{border-left:3px solid var(--primary)}
-.tag{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.78em;font-weight:bold}
-.tag.value{background:var(--success);color:#002}.tag.weak{background:var(--warning);color:#220}.tag.no{background:#3a3f55;color:#ccc}
+th,td{padding:9px 10px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--muted);font-weight:700;font-size:.72em;text-transform:uppercase;letter-spacing:.08em;background:rgba(255,255,255,.02)}
+tbody tr:hover td{background:rgba(255,255,255,.02)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:.74em;font-weight:700}
+.tag.value{background:rgba(34,211,138,.16);color:#3fe0a0;border:1px solid rgba(34,211,138,.35)}.tag.weak{background:rgba(245,179,1,.14);color:#f7c948;border:1px solid rgba(245,179,1,.35)}.tag.no{background:rgba(148,163,184,.12);color:#b6c2d4;border:1px solid var(--line2)}
 .scores{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-@media(max-width:800px){.scores{grid-template-columns:repeat(3,1fr)}}
-.score{background:#0f1a30;border-radius:8px;padding:8px;text-align:center}
-.score .s{font-size:1.2em;font-weight:bold}.score .p{font-size:.8em;color:var(--muted)}
-.verdict{padding:14px;border-radius:10px;background:#0f1a30;border:2px solid var(--success);font-weight:bold;font-size:1.05em}
-.verdict.none{border-color:#555}
+.score{background:var(--field);border:1px solid var(--line);border-radius:10px;padding:9px;text-align:center}
+.score .s{font-size:1.2em;font-weight:800}.score .p{font-size:.76em;color:var(--muted)}
+.verdict{padding:14px;border-radius:12px;background:rgba(34,211,138,.08);border:1px solid rgba(34,211,138,.4);font-weight:700}
+.verdict.none{background:var(--field);border-color:var(--line2)}
 .recos{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}
-@media(max-width:800px){.recos{grid-template-columns:1fr}}
-.rc{background:#0f1a30;border-radius:10px;padding:14px;border-top:4px solid var(--primary)}
-.rc.t1{border-top-color:var(--success)}.rc.t2{border-top-color:var(--warning)}.rc.t3{border-top-color:var(--secondary)}
-.rc .k{font-size:.78em;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
-.rc .m{font-size:1.15em;font-weight:bold;margin:4px 0}
-.rc .pp{font-size:1.6em;font-weight:bold}
-.rc .o{font-size:.88em;margin-top:6px}
-.scen{background:#0f1a30;border-radius:10px;padding:12px;font-size:.95em}
+.rc{position:relative;background:linear-gradient(180deg,var(--surface2),var(--field));border:1px solid var(--line);border-radius:14px;padding:16px;overflow:hidden}
+.rc:before{content:"";position:absolute;inset:0 0 auto 0;height:3px;background:var(--brand)}
+.rc.t1:before{background:var(--success)}.rc.t2:before{background:var(--gold)}.rc.t3:before{background:var(--red)}
+.rc .k{font-size:.72em;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.rc .m{font-size:1.1em;font-weight:700;margin:6px 0 2px}
+.rc .pp{font-family:'Barlow Condensed',Inter,sans-serif;font-size:2.2em;font-weight:800;line-height:1.1}
+.rc .o{font-size:.86em;margin-top:6px}
+.scen{background:var(--field);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:.94em}
 .note{font-size:.82em;color:var(--muted)}
-.warn{color:var(--warning)}
+.warn{color:var(--gold)}
 .chartbox{position:relative;height:240px}
-.ac{position:relative}.ac-list{position:absolute;z-index:10;left:0;right:0;background:#0f1a30;border:1px solid #2c3a5a;border-radius:8px;max-height:260px;overflow:auto}
-.ac-item{padding:8px 10px;cursor:pointer;border-bottom:1px solid var(--line)}.ac-item:hover{background:#1c2b4d}
+.ac{position:relative}.ac-list{position:absolute;z-index:10;left:0;right:0;background:var(--surface2);border:1px solid var(--line2);border-radius:10px;max-height:260px;overflow:auto;box-shadow:var(--shadow)}
+.ac-item{padding:9px 12px;cursor:pointer;border-bottom:1px solid var(--line)}.ac-item:hover{background:#1d2c4a}
 .ac-item small{color:var(--muted)}
-.tablewrap{overflow-x:auto}
-.footer{text-align:center;font-size:.8em;color:var(--muted);padding:20px}
-.err{background:#3a1020;border:1px solid var(--secondary);padding:16px;border-radius:10px}
+.tablewrap{overflow-x:auto;border-radius:10px}
+.err{background:rgba(240,71,92,.1);border:1px solid var(--red);padding:16px;border-radius:12px;margin-bottom:16px}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.badge{padding:6px 12px;border-radius:999px;font-size:.78em;font-weight:600;background:rgba(255,255,255,.06);border:1px solid var(--line2);color:#d6deea}
+.footer{margin-top:28px;padding:22px 0 8px;border-top:1px solid var(--line);font-size:.78em;color:var(--muted);text-align:center;line-height:1.7}
+/* accueil */
+.hero{position:relative;overflow:hidden;border-radius:22px;padding:38px 34px;margin-bottom:18px;border:1px solid var(--line);
+  background:radial-gradient(700px 320px at 85% 10%,rgba(22,199,132,.22),transparent 60%),radial-gradient(500px 260px at 0% 100%,rgba(245,179,1,.12),transparent 60%),linear-gradient(135deg,#13203a,#0d1628)}
+.hero .pitch{position:absolute;right:-40px;bottom:-40px;width:340px;opacity:.16}
+.hero .eyebrow{display:inline-flex;align-items:center;gap:8px;font-size:.74em;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--brand);background:rgba(22,199,132,.1);border:1px solid rgba(22,199,132,.3);padding:5px 12px;border-radius:999px}
+.hero h1{font-family:'Barlow Condensed',Inter,sans-serif;font-weight:800;font-size:3em;line-height:1;letter-spacing:.01em;text-transform:uppercase;margin:14px 0 10px;max-width:640px}
+.hero h1 em{font-style:normal;color:var(--brand)}
+.hero p{color:#b8c4d6;max-width:560px}
+.hero .cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
+.hero .cta .btn{width:auto;margin:0;padding:13px 20px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.tile .v{font-family:'Barlow Condensed',Inter,sans-serif;font-size:2.1em;font-weight:800;line-height:1}
+.tile .l{font-size:.8em;color:var(--muted);margin-top:6px}
+.qgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.qcard{display:block;position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;cursor:pointer;transition:transform .15s,border-color .15s}
+.qcard:hover{transform:translateY(-2px);border-color:color-mix(in srgb,var(--c) 55%,transparent)}
+.qcard .qi{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;color:var(--c);background:color-mix(in srgb,var(--c) 16%,transparent);margin-bottom:12px}
+.qcard .qi svg{width:22px;height:22px}
+.qcard b{display:block;font-size:1em}.qcard span{font-size:.84em;color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.step{background:var(--field);border:1px solid var(--line);border-radius:12px;padding:16px}
+.step .n{font-family:'Barlow Condensed',Inter,sans-serif;font-size:1.8em;font-weight:800;color:var(--brand);line-height:1}
+.step b{display:block;margin:6px 0 2px}
+@media(max-width:1000px){
+  .app{grid-template-columns:1fr;background:none}
+  .side{position:fixed;left:0;top:0;height:100vh;width:280px;z-index:60;transform:translateX(-100%);transition:transform .25s;padding-top:20px}
+  body.menu-open .side{transform:none;box-shadow:var(--shadow)}
+  body.menu-open .overlay{display:block;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:55}
+  .burger{display:grid}
+  .topbar .chip{display:none}
+  .main{padding:16px 16px 92px}
+  .bottomnav{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;bottom:0;left:0;right:0;z-index:45;background:rgba(12,19,36,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line);padding:6px 4px calc(6px + env(safe-area-inset-bottom))}
+  .bottomnav a{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.66em;font-weight:600;color:#8391a7;padding:4px 0}
+  .bottomnav a svg{width:21px;height:21px}
+  .bottomnav a.active{color:var(--brand)}
+  .tiles{grid-template-columns:repeat(2,1fr)}
+  .qgrid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:800px){
+  .grid2,.grid3,.recos,.steps{grid-template-columns:1fr}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .scores{grid-template-columns:repeat(3,1fr)}
+  .hero{padding:24px 18px}.hero h1{font-size:2.1em}.hero p{font-size:.92em}.hero .pitch,.hero .badges{display:none}.hero .cta{display:grid;grid-template-columns:1fr 1fr}.hero .cta .btn{padding:12px 10px;font-size:.88em;text-align:center}
+  .page-hero{padding:16px;align-items:flex-start}.page-hero h1{font-size:1.45em}.page-hero p{font-size:.85em}.page-hero .ic{width:40px;height:40px;border-radius:11px}.page-hero .ic svg{width:21px;height:21px}
+  .qgrid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<div class="header">
-  <h1>⚽ AZETO PRONOS</h1>
-  <p>Pronostics calculés sur les vrais résultats · championnats, coupes d'Europe et sélections nationales</p>
-  <div class="badges" id="badges"></div>
-</div>
-<div class="container">
+<header class="topbar">
+  <button class="burger" id="burger" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg></button>
+  <a class="brand" href="#accueil"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" style="color:#04130c"><circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 4.5h-5L8 10z"/><path d="M12 3v4M21 10l-5 0M18 19l-3.5-4.5M6 19l3.5-4.5M3 10h5"/></svg></span><span>AZETO <b>PRONOS</b></span></a>
+  <span class="sp"></span>
+  <span class="chip" id="updChip"><span class="dot"></span>Chargement…</span>
+</header>
+<div class="overlay" id="overlay"></div>
+<div class="app">
+<aside class="side" id="side">
+  <div class="grp">Pronostics</div>
+  <a class="nav" href="#accueil" data-tab="accueil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Accueil</span></a><a class="nav" href="#selection" data-tab="selection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><span>Pronos du jour</span></a><a class="nav" href="#match" data-tab="match"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg><span>Analyser un match</span></a>
+  <div class="grp">Classements</div>
+  <a class="nav" href="#ligue" data-tab="ligue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8 20h8"/></svg><span>Championnats</span></a><a class="nav" href="#europe" data-tab="europe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Clubs européens</span></a><a class="nav" href="#nations" data-tab="nations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg><span>Sélections nationales</span></a>
+  <div class="grp">Infos</div>
+  <a class="nav" href="#methode" data-tab="methode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg><span>Méthode & fiabilité</span></a>
+  <a class="nav" style="cursor:default;opacity:.7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/></svg><span>Abonnement Premium</span><span class="soon">BIENTÔT</span></a>
+  <div class="legal">© 2026 Yves Sourou Koudjo<br>AZETO Pronos · 18+ · Jeu responsable</div>
+</aside>
+<main class="main"><div class="wrap">
   <div id="noData" class="err hidden">
-    <b>Données introuvables.</b> Lance d'abord <b>MAJ_DONNEES.ps1</b> (clic droit → Exécuter avec PowerShell). Il crée le fichier <code>data/donnees.js</code> à côté de cette page.
-  </div>
-  <div class="tabs">
-    <button class="tab active" data-tab="selection">⭐ Sélection du jour</button>
-    <button class="tab" data-tab="match">📊 Analyser un match</button>
-    <button class="tab" data-tab="ligue">🏆 Classement championnat</button>
-    <button class="tab" data-tab="europe">🌍 Classement Europe (Elo)</button>
-    <button class="tab" data-tab="nations">🌐 Sélections nationales</button>
-    <button class="tab" data-tab="methode">ℹ️ Méthode</button>
+    <b>Données introuvables.</b> Le fichier <code>data/donnees.js</code> n'a pas pu être chargé. Réessaie dans quelques minutes.
   </div>
 
-  <!-- SELECTION -->
-  <section id="tab-selection">
+  <!-- ACCUEIL -->
+  <section id="tab-accueil" style="--accent:var(--brand)">
+    <div class="hero">
+      <svg class="pitch" viewBox="0 0 200 130" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="2" width="196" height="126" rx="4"/><path d="M100 2v126"/><circle cx="100" cy="65" r="20"/><rect x="2" y="35" width="30" height="60"/><rect x="168" y="35" width="30" height="60"/></svg>
+      <span class="eyebrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 4.5h-5L8 10z"/><path d="M12 3v4M21 10l-5 0M18 19l-3.5-4.5M6 19l3.5-4.5M3 10h5"/></svg> Pronostics football</span>
+      <h1>Des pronostics <em>calculés</em>, pas devinés.</h1>
+      <p>Chaque probabilité vient des vrais résultats : forces d'attaque et de défense des clubs, classement Elo des sélections, mis à jour tous les jours. Tu vois aussi quand une cote ne vaut pas le coup.</p>
+      <div class="cta"><a class="btn" href="#selection">Voir les pronos du jour</a><a class="btn ghost" href="#match">Analyser un match</a></div>
+      <div class="badges" id="badges"></div>
+    </div>
+    <div class="tiles" id="homeTiles"></div>
     <div class="card">
-      <h2>⭐ Sélection AZETO : les 3 paris les plus solides</h2>
+      <h2>Les 3 choix les plus solides des 7 prochains jours</h2>
+      <div id="homePicks"><p class="note">Calcul en cours…</p></div>
+      <a class="mini-btn" href="#selection" style="display:inline-block;margin-top:14px">Voir tous les matchs analysés →</a>
+    </div>
+    <div class="qgrid" style="margin-bottom:16px">
+      <a class="qcard" href="#match" style="--c:var(--blue)"><div class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></div><b>Analyser un match</b><span>Championnat, Coupe d'Europe ou sélections : probabilités, scores et value.</span></a>
+      <a class="qcard" href="#ligue" style="--c:var(--gold)"><div class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8 20h8"/></svg></div><b>Classements championnats</b><span>20 championnats classés selon la forme réelle, pas seulement les points.</span></a>
+      <a class="qcard" href="#nations" style="--c:var(--orange)"><div class="qi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg></div><b>Sélections nationales</b><span>217 pays : CAN, Coupe du monde, Euro, Ligue des nations…</span></a>
+    </div>
+    <div class="card">
+      <h2>Comment bien utiliser AZETO Pronos</h2>
+      <div class="steps">
+        <div class="step"><div class="n">01</div><b>Choisis un match</b><span class="note">Dans les pronos du jour ou dans l'analyse.</span></div>
+        <div class="step"><div class="n">02</div><b>Compare avec ta cote</b><span class="note">Saisis la cote de ton bookmaker : la page dit si elle vaut le coup.</span></div>
+        <div class="step"><div class="n">03</div><b>Mise petit et régulier</b><span class="note">1 à 2 % de ta bankroll par pari, sans combiné.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SELECTION -->
+  <section id="tab-selection" class="hidden" style="--accent:var(--brand)">
+    <div class="page-hero"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></div><div><div class="eyebrow">Pronos du jour</div><h1>Les paris les plus solides</h1><p>Sélection automatique sur les prochains matchs : probabilité entre 75 et 92 %, données suffisantes, value vérifiée quand la cote du marché est connue.</p></div></div>
+    <div class="card">
+      <h2>Les 3 paris les plus solides</h2>
       <div class="grid2"><div><label>Période</label><select id="selDays"><option value="3">3 prochains jours</option><option value="7" selected>7 prochains jours</option><option value="10">10 prochains jours</option></select></div>
       <div><label>Championnat</label><select id="selLg"><option>Tous</option></select></div></div>
       <div id="selPicks" style="margin-top:12px"></div>
       <p class="note" style="margin-top:10px">Choix automatiques : probabilité entre 75 et 92 %, au moins 15 matchs de données pour chaque équipe, un seul pari par match. Quand la cote du marché est connue (moyenne des bookmakers), un pari sans value est écarté. Vérifie toujours les absences et la composition avant de jouer. Ne combine pas : 3 paris à 90 % ne passent ensemble que 73 % du temps.</p>
     </div>
     <div class="card" id="valueCard">
-      <h2>💰 Value détectée avec les cotes du marché</h2>
+      <h2>Value détectée avec les cotes du marché</h2>
       <div id="selValue"></div>
     </div>
     <div class="card">
-      <h2>📅 Tous les prochains matchs analysés</h2>
+      <h2>Tous les prochains matchs analysés</h2>
       <div class="tablewrap"><table id="selT"><thead><tr><th>Date</th><th>Match</th><th>Championnat</th><th class="n">1</th><th class="n">N</th><th class="n">2</th><th class="n">Buts att.</th><th>Meilleur choix</th><th></th></tr></thead><tbody></tbody></table></div>
     </div>
   </section>
 
   <!-- MATCH -->
-  <section id="tab-match" class="hidden">
+  <section id="tab-match" class="hidden" style="--accent:var(--blue)">
+    <div class="page-hero"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></div><div><div class="eyebrow">Analyse</div><h1>Analyser un match</h1><p>Championnat, Coupe d'Europe ou sélections nationales : buts attendus, 1N2, scores exacts, tous les marchés et recommandation de pari.</p></div></div>
     <div class="card">
       <div class="seg"><button id="modeL" class="active">Championnat</button><button id="modeE">Coupe d'Europe</button><button id="modeN">Sélections</button></div>
       <div id="formL">
@@ -151,7 +277,7 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
         <div><label>Ajustement contexte domicile (%) : absences, enjeu, fatigue</label><input type="number" id="adjH" value="0" step="5"></div>
         <div><label>Ajustement contexte extérieur (%)</label><input type="number" id="adjA" value="0" step="5"></div>
       </div>
-      <button class="btn" id="go">📊 ANALYSER LE MATCH</button>
+      <button class="btn" id="go">ANALYSER LE MATCH</button>
       <p class="note" id="check"></p>
     </div>
 
@@ -160,13 +286,13 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
         <h2 id="resTitle"></h2>
         <div class="kpis" id="kpis"></div>
       </div>
-      <div class="card"><h2>🧠 Recommandation de pari</h2><div id="reco"></div></div>
+      <div class="card"><h2>Recommandation de pari</h2><div id="reco"></div></div>
       <div class="grid2">
-        <div class="card"><h2>🎯 Verdict avec tes cotes</h2><div id="verdict"></div><h3 style="margin-top:14px">Marchés à forte probabilité (≥ 75 %)</h3><div id="safe"></div></div>
-        <div class="card"><h2>🔢 Scores les plus probables</h2><div class="scores" id="scores"></div></div>
+        <div class="card"><h2>Verdict avec tes cotes</h2><div id="verdict"></div><h3 style="margin-top:14px">Marchés à forte probabilité (≥ 75 %)</h3><div id="safe"></div></div>
+        <div class="card"><h2>Scores les plus probables</h2><div class="scores" id="scores"></div></div>
       </div>
       <div class="card">
-        <h2>💰 Tous les marchés</h2>
+        <h2>Tous les marchés</h2>
         <p class="note">Saisis la cote de ton bookmaker : la page calcule la value (EV = proba × cote − 1). On ne parie que si EV ≥ 3 % et cote ≥ 1,10.</p>
         <div class="tablewrap"><table id="mk"><thead><tr><th>Marché</th><th class="n">Proba</th><th class="n">Cote juste</th><th class="n">Cote bookmaker</th><th class="n">Value</th><th>Verdict</th></tr></thead><tbody></tbody></table></div>
       </div>
@@ -178,7 +304,8 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
   </section>
 
   <!-- LIGUE -->
-  <section id="tab-ligue" class="hidden">
+  <section id="tab-ligue" class="hidden" style="--accent:var(--gold)">
+    <div class="page-hero"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8 20h8"/></svg></div><div><div class="eyebrow">Classements</div><h1>Championnats</h1><p>Les équipes classées selon leurs performances récentes : buts marqués et encaissés, à domicile et à l'extérieur.</p></div></div>
     <div class="card">
       <h2>Classement par performances récentes</h2>
       <label>Championnat</label><select id="lgRank"></select>
@@ -188,7 +315,8 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
   </section>
 
   <!-- EUROPE -->
-  <section id="tab-europe" class="hidden">
+  <section id="tab-europe" class="hidden" style="--accent:var(--violet)">
+    <div class="page-hero"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div><div><div class="eyebrow">Classements</div><h1>Clubs européens (Elo)</h1><p>Plus de 1 100 clubs de 54 pays notés sur une même échelle pour comparer des équipes de championnats différents.</p></div></div>
     <div class="card">
       <h2>Classement européen Elo</h2>
       <div class="grid2"><div><label>Pays</label><select id="ctrySel"></select></div><div><label>Rechercher un club</label><input id="eloSearch" placeholder="ex. Ludogorets"></div></div>
@@ -198,7 +326,8 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
   </section>
 
   <!-- SELECTIONS -->
-  <section id="tab-nations" class="hidden">
+  <section id="tab-nations" class="hidden" style="--accent:var(--orange)">
+    <div class="page-hero"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg></div><div><div class="eyebrow">Classements</div><h1>Sélections nationales</h1><p>Classement Elo mondial de 217 sélections, par continent, avec la forme récente. L'Afrique est affichée en premier.</p></div></div>
     <div class="card">
       <h2>Classement mondial des sélections (Elo)</h2>
       <div class="grid2"><div><label>Continent</label><select id="confSel"></select></div><div><label>Rechercher un pays</label><input id="nSearch" placeholder="ex. Bénin"></div></div>
@@ -208,7 +337,8 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
   </section>
 
   <!-- METHODE -->
-  <section id="tab-methode" class="hidden">
+  <section id="tab-methode" class="hidden" style="--accent:#94a3b8">
+    <div class="page-hero"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg></div><div><div class="eyebrow">Infos</div><h1>Méthode & fiabilité</h1><p>Comment sont calculées les probabilités, d'où viennent les données, et ce qu'il faut savoir avant de parier.</p></div></div>
     <div class="card">
       <h2>Comment sont calculés les pronostics</h2>
       <p><b>Championnat.</b> Pour chaque équipe, on mesure les buts marqués et encaissés à domicile et à l'extérieur, comparés à la moyenne du championnat. Chaque match pèse moins à mesure qu'il vieillit (demi-vie 180 jours). On ajoute 4 matchs « moyens » fictifs pour éviter les extrêmes en début de saison. Buts attendus domicile = attaque domicile × défense extérieure adverse × moyenne de buts à domicile du championnat (et inversement).</p><br>
@@ -220,8 +350,16 @@ tr.safe td:first-child{border-left:3px solid var(--primary)}
       <p class="note" id="srcNote"></p>
     </div>
   </section>
-  <div class="footer"><b>© 2026 Yves Sourou Koudjo · AZETO Pronos · Tous droits réservés.</b><br>Version du site : 08/11/2026 (sélections nationales)<br>Reproduction ou copie interdite sans autorisation.<br>Les probabilités sont des estimations statistiques, pas des certitudes · 18+ · jeu responsable</div>
+  <div class="footer"><b>© 2026 Yves Sourou Koudjo · AZETO Pronos · Tous droits réservés.</b><br>Reproduction ou copie interdite sans autorisation.<br>Les probabilités sont des estimations statistiques, pas des certitudes · 18+ · Joue avec modération<br><span style="opacity:.7">Version du site : 08/11/2026 (nouveau design)</span></div>
+</div></main>
 </div>
+<nav class="bottomnav" id="bottomnav">
+  <a href="#accueil" data-tab="accueil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Accueil</span></a>
+  <a href="#selection" data-tab="selection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><span>Pronos</span></a>
+  <a href="#match" data-tab="match"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg><span>Analyser</span></a>
+  <a href="#nations" data-tab="nations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg><span>Sélections</span></a>
+  <a href="#" id="bnMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg><span>Menu</span></a>
+</nav>
 
 <script>
 "use strict";
@@ -485,12 +623,12 @@ function drawSelection(){
   // table complète
   $('selT').querySelector('tbody').innerHTML = list.map((u,i) => {
     const b = u.cands.filter(x => x.g && x.p >= 0.58 && x.p < 0.92).sort((a,b) => b.p - a.p)[0];
-    return `<tr><td>${dstr(u)}</td><td><b>${esc(u.H.name)} – ${esc(u.A.name)}</b>${u.n < 15 ? ' <span class="tag weak" title="Équipe promue sans historique de 2e division disponible : estimation à partir d\'un promu type">promu · estimation</span>' : ''}</td><td>${esc(u.lg)}</td><td class="n">${pct(u.r.p1)}</td><td class="n">${pct(u.r.px)}</td><td class="n">${pct(u.r.p2)}</td><td class="n">${f2(u.r.lh)} – ${f2(u.r.la)}</td><td>${b ? b.nm + ' (' + pct(b.p) + ')' : '<span class="note">—</span>'}</td><td><button class="tab" style="padding:4px 10px;font-size:.8em" data-open="${UPCOMING.indexOf(u)}">Détail</button></td></tr>`;
+    return `<tr><td>${dstr(u)}</td><td><b>${esc(u.H.name)} – ${esc(u.A.name)}</b>${u.n < 15 ? ' <span class="tag weak" title="Équipe promue sans historique de 2e division disponible : estimation à partir d\'un promu type">promu · estimation</span>' : ''}</td><td>${esc(u.lg)}</td><td class="n">${pct(u.r.p1)}</td><td class="n">${pct(u.r.px)}</td><td class="n">${pct(u.r.p2)}</td><td class="n">${f2(u.r.lh)} – ${f2(u.r.la)}</td><td>${b ? b.nm + ' (' + pct(b.p) + ')' : '<span class="note">—</span>'}</td><td><button class="mini-btn" data-open="${UPCOMING.indexOf(u)}">Détail</button></td></tr>`;
   }).join('') || '<tr><td colspan="9" class="note">Aucun match.</td></tr>';
   document.querySelectorAll('[data-open]').forEach(btn => btn.onclick = () => openMatch(UPCOMING[+btn.dataset.open]));
 }
 function openMatch(u){
-  document.querySelector('[data-tab=match]').click(); setMode('L');
+  if (location.hash !== '#match') location.hash = 'match'; go('match'); setMode('L');
   $('lgSel').value = u.lg; fillTeams(); $('hSel').value = u.H.name; $('aSel').value = u.A.name; showTeam('h'); showTeam('a');
   analyse();
   if (u.odds) document.querySelectorAll('#mk input.odd').forEach(x => { const k = OK_KEYS[current.list[+x.dataset.i][0]]; if (k && +u.odds[k] > 1) x.value = u.odds[k]; });
@@ -519,6 +657,13 @@ function init(){
   setupAC('eH','eHl','eHs'); setupAC('eA','eAl','eAs');
   buildUpcoming(D); $('selDays').onchange = drawSelection; $('selLg').onchange = drawSelection; drawSelection();
   initIntl(D);
+  $('updChip').innerHTML = `<span class="dot"></span>Données du ${esc(D.maj)}`;
+  const nT = Object.values(MODEL.teams).reduce((s,x) => s + x.length, 0);
+  $('homeTiles').innerHTML = [[rows.filter(r => !r.tier).length.toLocaleString('fr-FR'), 'matchs de championnat analysés'], [leagues.length, 'championnats suivis'],
+    [D.intl && D.intl.teams ? D.intl.teams.length : '—', 'sélections nationales'], [UPCOMING.length, 'matchs à venir déjà calculés']]
+    .map(([v,l]) => `<div class="tile"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+  const hp = $('selPicks').querySelector('.recos');
+  $('homePicks').innerHTML = hp ? hp.outerHTML : $('selPicks').innerHTML;
   if (!ELO.length) $('modeE').title = "Elo indisponible : relance la mise à jour";
 }
 function fillTeams(){
@@ -582,7 +727,7 @@ function drawNations(){
   const c = $('confSel').value, q = $('nSearch').value.trim().toLowerCase();
   const l = INTL.teams.filter(t => (c === 'Monde' || t.conf === c) && (!q || t.fr.toLowerCase().includes(q) || t.n.toLowerCase().includes(q)));
   $('nT').querySelector('tbody').innerHTML = l.map(t => { const f = t.form[t.form.length-1]; const [y,m,d] = f.d.split('-');
-    return `<tr${t.n === 'Benin' ? ' style="background:rgba(0,212,255,.08)"' : ''}><td>${t.rank}</td><td><b>${esc(t.fr)}</b></td><td>${esc(t.conf)}</td><td class="n">${t.crank}</td><td class="n">${t.elo}</td><td style="white-space:nowrap">${formHtml(t.form)}</td><td class="note">${d}/${m}/${y} · ${esc(f.o)} ${esc(f.s)} (${esc(f.c)})</td></tr>`; }).join('') || '<tr><td colspan="7" class="note">Aucune sélection.</td></tr>';
+    return `<tr${t.n === 'Benin' ? ' style="background:rgba(249,115,22,.10)"' : ''}><td>${t.rank}</td><td><b>${esc(t.fr)}</b></td><td>${esc(t.conf)}</td><td class="n">${t.crank}</td><td class="n">${t.elo}</td><td style="white-space:nowrap">${formHtml(t.form)}</td><td class="note">${d}/${m}/${y} · ${esc(f.o)} ${esc(f.s)} (${esc(f.c)})</td></tr>`; }).join('') || '<tr><td colspan="7" class="note">Aucune sélection.</td></tr>';
 }
 function analyse(){
   const adjH = 1 + (+$('adjH').value||0)/100, adjA = 1 + (+$('adjA').value||0)/100;
@@ -628,7 +773,7 @@ function render(title){
   tb.querySelectorAll('input.odd').forEach(x => x.addEventListener('input', updateValue));
   updateValue();
   drawCharts();
-  $('res').scrollIntoView({behavior:'smooth'});
+  setTimeout(() => $('res').scrollIntoView({behavior:'smooth'}), 50);
 }
 
 /* ---------- recommandation automatique ---------- */
@@ -692,11 +837,11 @@ function drawCharts(){
   if (typeof Chart === 'undefined') return;
   Object.values(charts).forEach(c => c.destroy());
   const r = current, tick = {color:'#e0e0e0'}, grid = {color:'rgba(255,255,255,.08)'};
-  charts.c1 = new Chart($('c1'), {type:'doughnut', data:{labels:['Domicile','Nul','Extérieur'], datasets:[{data:[r.p1,r.px,r.p2].map(x => +(x*100).toFixed(1)), backgroundColor:['rgba(0,212,255,.75)','rgba(255,214,10,.75)','rgba(255,0,110,.75)'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:'#e0e0e0'}}}}});
+  charts.c1 = new Chart($('c1'), {type:'doughnut', data:{labels:['Domicile','Nul','Extérieur'], datasets:[{data:[r.p1,r.px,r.p2].map(x => +(x*100).toFixed(1)), backgroundColor:['rgba(22,199,132,.85)','rgba(245,179,1,.85)','rgba(240,71,92,.85)'], borderWidth:0}]}, options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:'#e0e0e0'}}}}});
   const lab = [0,1,2,3,4,5,6];
   charts.c2 = new Chart($('c2'), {type:'bar', data:{labels:lab.map(String), datasets:[
-    {label:'Domicile (%)', data:lab.map(k => +(pois(k,r.lh)*100).toFixed(1)), backgroundColor:'rgba(0,212,255,.7)'},
-    {label:'Extérieur (%)', data:lab.map(k => +(pois(k,r.la)*100).toFixed(1)), backgroundColor:'rgba(255,0,110,.7)'}]},
+    {label:'Domicile (%)', data:lab.map(k => +(pois(k,r.lh)*100).toFixed(1)), backgroundColor:'rgba(22,199,132,.8)'},
+    {label:'Extérieur (%)', data:lab.map(k => +(pois(k,r.la)*100).toFixed(1)), backgroundColor:'rgba(240,71,92,.8)'}]},
     options:{responsive:true, maintainAspectRatio:false, plugins:{legend:{labels:{color:'#e0e0e0'}}}, scales:{x:{ticks:tick, grid, title:{display:true, text:'Buts', color:'#9aa4b8'}}, y:{ticks:tick, grid}}}});
 }
 function drawRank(){
@@ -708,10 +853,23 @@ function drawElo(){
   const l = ELO.filter(e => (c === 'Tous les pays' || e.ctry === c) && (!q || e.club.toLowerCase().includes(q))).slice(0, 300);
   $('eloT').querySelector('tbody').innerHTML = l.map(e => `<tr><td>${e.rank}</td><td><b>${esc(e.club)}</b></td><td>${esc(e.ctry)}</td><td>${esc(e.level)}</td><td class="n">${e.elo}</td><td class="n">${e.crank}</td></tr>`).join('') || '<tr><td colspan="6" class="note">Aucun club.</td></tr>';
 }
-document.querySelectorAll('.tab').forEach(b => b.onclick = () => {
-  document.querySelectorAll('.tab').forEach(x => x.classList.toggle('active', x === b));
-  ['selection','match','ligue','europe','nations','methode'].forEach(t => $('tab-'+t).classList.toggle('hidden', b.dataset.tab !== t));
-});
+/* ---------- navigation (une page par fonctionnalité) ---------- */
+const PAGES = ['accueil','selection','match','ligue','europe','nations','methode'];
+const TITLES = {accueil:'Accueil', selection:'Pronos du jour', match:'Analyser un match', ligue:'Championnats', europe:'Clubs européens', nations:'Sélections nationales', methode:'Méthode'};
+function go(page, scroll = true){
+  if (!PAGES.includes(page)) page = 'accueil';
+  PAGES.forEach(t => $('tab-'+t).classList.toggle('hidden', t !== page));
+  document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('active', x.dataset.tab === page));
+  document.body.classList.remove('menu-open');
+  document.title = (page === 'accueil' ? '' : TITLES[page] + ' · ') + 'AZETO Pronos';
+  if (scroll) window.scrollTo(0, 0);
+  if (page === 'match' && typeof Chart !== 'undefined' && current) drawCharts();
+}
+window.addEventListener('hashchange', () => go(location.hash.slice(1)));
+$('burger').onclick = () => document.body.classList.toggle('menu-open');
+$('overlay').onclick = () => document.body.classList.remove('menu-open');
+$('bnMenu').onclick = e => { e.preventDefault(); document.body.classList.add('menu-open'); };
+go(location.hash.slice(1) || 'accueil', false);
 $('modeL').onclick = () => setMode('L'); $('modeE').onclick = () => setMode('E'); $('modeN').onclick = () => setMode('N');
 $('go').onclick = analyse;
 init();
