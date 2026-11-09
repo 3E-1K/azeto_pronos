@@ -143,6 +143,37 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
 .step{background:var(--field);border:1px solid var(--line);border-radius:12px;padding:16px}
 .step .n{font-family:'Barlow Condensed',Inter,sans-serif;font-size:1.8em;font-weight:800;color:var(--brand);line-height:1}
 .step b{display:block;margin:6px 0 2px}
+.pick-list{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:12px}
+.pick{display:flex;align-items:center;gap:12px;padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer}
+.pick:last-child{border-bottom:none}.pick:hover{background:rgba(255,255,255,.03)}
+.pick .ck{width:24px;height:24px;flex:none;border-radius:7px;border:1.5px solid var(--line2);display:grid;place-items:center;color:transparent;font-weight:900}
+.pick.on .ck{background:var(--accent);border-color:var(--accent);color:#04130c}
+.pick .mt{flex:1;min-width:0}.pick .mt b{display:block;font-size:.95em}.pick .mt small{color:var(--muted);font-size:.78em}
+.pick .pr{font-size:.78em;color:var(--muted);text-align:right;white-space:nowrap}
+.basket{display:flex;flex-wrap:wrap;gap:8px}
+.bchip{display:inline-flex;align-items:center;gap:8px;padding:7px 8px 7px 12px;border-radius:999px;background:color-mix(in srgb,var(--accent) 14%,transparent);border:1px solid color-mix(in srgb,var(--accent) 40%,transparent);font-size:.85em;font-weight:600}
+.bchip button{border:none;background:rgba(0,0,0,.25);color:var(--text);width:22px;height:22px;border-radius:50%;cursor:pointer;font-weight:800}
+.combos{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.combo{position:relative;border-radius:16px;border:1px solid var(--line);background:linear-gradient(180deg,var(--surface2),var(--field));padding:18px;overflow:hidden}
+.combo:before{content:"";position:absolute;inset:0 0 auto 0;height:4px;background:var(--c)}
+.combo .k{font-size:.72em;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--c)}
+.combo .rate{font-family:'Barlow Condensed',Inter,sans-serif;font-size:3em;font-weight:800;line-height:1;margin:8px 0 2px}
+.combo .sub{font-size:.8em;color:var(--muted)}
+.combo .gauge{height:8px;border-radius:99px;background:rgba(255,255,255,.07);margin:12px 0 14px;overflow:hidden}.combo .gauge i{display:block;height:100%;background:var(--c);border-radius:99px}
+.combo .leg{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px dashed var(--line2);font-size:.86em}
+.combo .leg b{display:block;font-size:.95em}.combo .leg small{color:var(--muted)}
+.combo .leg .lp{text-align:right;white-space:nowrap;font-weight:700}
+.combo .odds{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.combo .odds div{background:rgba(0,0,0,.2);border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+.combo .odds b{display:block;font-size:1.15em}.combo .odds span{font-size:.72em;color:var(--muted)}
+.tip-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.tip{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px}
+.tip .num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;background:color-mix(in srgb,var(--accent) 18%,transparent);color:var(--accent);font-weight:800;margin-bottom:8px}
+.tip h3{color:#fff;font-size:1.02em;margin:0 0 6px}
+.tip p,.tip li{font-size:.9em;color:#c3cddc}.tip ul{padding-left:18px;margin-top:6px}.tip li{margin:3px 0}
+.calc{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.calc .out{grid-column:1/-1;background:var(--field);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-weight:600}
+.danger{border-color:rgba(240,71,92,.4)!important;background:rgba(240,71,92,.07)!important}
 @media(max-width:1000px){
   .app{grid-template-columns:1fr;background:none}
   .side{position:fixed;left:0;top:0;height:100vh;width:280px;z-index:60;transform:translateX(-100%);transition:transform .25s;padding-top:20px}
@@ -159,7 +190,7 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
   .qgrid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:800px){
-  .grid2,.grid3,.recos,.steps{grid-template-columns:1fr}
+  .grid2,.grid3,.recos,.steps,.combos,.tip-grid{grid-template-columns:1fr}
   .kpis{grid-template-columns:repeat(2,1fr)}
   .scores{grid-template-columns:repeat(3,1fr)}
   .hero{padding:24px 18px}.hero h1{font-size:2.1em}.hero p{font-size:.92em}.hero .pitch,.hero .badges{display:none}.hero .cta{display:grid;grid-template-columns:1fr 1fr}.hero .cta .btn{padding:12px 10px;font-size:.88em;text-align:center}
@@ -180,10 +211,11 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
 <aside class="side" id="side">
   <div class="grp">Pronostics</div>
   <a class="nav" href="#accueil" data-tab="accueil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Accueil</span></a><a class="nav" href="#selection" data-tab="selection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><span>Pronos du jour</span></a><a class="nav" href="#match" data-tab="match"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg><span>Analyser un match</span></a>
+  <a class="nav" href="#combine" data-tab="combine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><span>Mon combiné</span></a>
   <div class="grp">Classements</div>
   <a class="nav" href="#ligue" data-tab="ligue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M8 4h8v5a4 4 0 0 1-8 0z"/><path d="M8 6H5a3 3 0 0 0 3 4"/><path d="M16 6h3a3 3 0 0 1-3 4"/><path d="M12 13v4"/><path d="M8 20h8"/></svg><span>Championnats</span></a><a class="nav" href="#europe" data-tab="europe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Clubs européens</span></a><a class="nav" href="#nations" data-tab="nations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg><span>Sélections nationales</span></a>
   <div class="grp">Infos</div>
-  <a class="nav" href="#methode" data-tab="methode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg><span>Méthode & fiabilité</span></a>
+  <a class="nav" href="#conseils" data-tab="conseils"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg><span>Conseils paris</span></a><a class="nav" href="#methode" data-tab="methode"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg><span>Méthode & fiabilité</span></a>
   <a class="nav" style="cursor:default;opacity:.7"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/></svg><span>Abonnement Premium</span><span class="soon">BIENTÔT</span></a>
   <div class="legal">© 2026 Yves Sourou Koudjo<br>AZETO Pronos · 18+ · Jeu responsable</div>
 </aside>
@@ -283,7 +315,7 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
 
     <div id="res" class="hidden">
       <div class="card">
-        <h2 id="resTitle"></h2>
+        <h2 id="resTitle"></h2><button class="mini-btn" id="addCombo" style="margin:-4px 0 12px">＋ Ajouter à mon combiné</button>
         <div class="kpis" id="kpis"></div>
       </div>
       <div class="card"><h2>Recommandation de pari</h2><div id="reco"></div></div>
@@ -336,6 +368,53 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
     </div>
   </section>
 
+  <!-- COMBINE -->
+  <section id="tab-combine" class="hidden" style="--accent:#22d3ee">
+    <div class="page-hero"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg></div><div><div class="eyebrow">Pronostics</div><h1>Mon combiné</h1><p>Choisis tes matchs : AZETO te propose 3 combinés (sécurité, équilibré, audacieux) avec le taux de réussite estimé et la cote minimale à exiger.</p></div></div>
+    <div class="card">
+      <h2>1. Choisis tes matchs</h2>
+      <div class="grid3"><div><label>Période</label><select id="cbDays"><option value="3">3 prochains jours</option><option value="7" selected>7 prochains jours</option><option value="10">10 prochains jours</option></select></div>
+        <div><label>Championnat</label><select id="cbLg"><option>Tous</option></select></div>
+        <div><label>Rechercher une équipe</label><input id="cbQ" placeholder="ex. Arsenal"></div></div>
+      <div class="pick-list" id="cbList" style="margin-top:12px"></div>
+      <p class="note" style="margin-top:8px">Un match de sélection nationale ou de Coupe d'Europe ? Analyse-le dans <a href="#match" style="color:var(--accent)">Analyser un match</a>, puis appuie sur « Ajouter à mon combiné ».</p>
+    </div>
+    <div class="card">
+      <h2>2. Ton panier <span class="note" id="cbCount" style="font-weight:600"></span></h2>
+      <div class="basket" id="cbBasket"></div>
+      <button class="mini-btn" id="cbClear" style="margin-top:12px">Vider le panier</button>
+    </div>
+    <div class="card">
+      <h2>3. Les 3 combinés proposés</h2>
+      <div id="cbOut"></div>
+    </div>
+  </section>
+
+  <!-- CONSEILS -->
+  <section id="tab-conseils" class="hidden" style="--accent:#a3e635">
+    <div class="page-hero"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z"/></svg></div><div><div class="eyebrow">Infos</div><h1>Conseils paris</h1><p>Les règles simples qui séparent le joueur qui perd sur la durée de celui qui garde le contrôle. À lire avant de miser.</p></div></div>
+    <div class="tip-grid">
+      <div class="tip"><div class="num">1</div><h3>Ne regarde pas seulement la probabilité, regarde la cote</h3>
+        <p>Un pari est intéressant quand <b>probabilité × cote &gt; 1</b>. Exemple : un pari à 80 % payé 1,30 rapporte en moyenne 0,80 × 1,30 = 1,04 → +4 %. Le même pari payé 1,20 fait perdre 4 % sur la durée, même s'il passe souvent.</p>
+        <div class="calc"><div><label>Probabilité AZETO (%)</label><input id="kP" type="number" value="80"></div><div><label>Cote du bookmaker</label><input id="kO" type="number" step="0.01" value="1.30"></div><div class="out" id="kOut"></div></div></div>
+      <div class="tip"><div class="num">2</div><h3>Mise toujours la même petite part</h3>
+        <p>Fixe une <b>bankroll</b> (l'argent réservé aux paris, que tu peux perdre sans problème) et mise <b>1 à 2 %</b> par pari. Même une bonne méthode connaît des séries de 5 ou 6 pertes : avec des petites mises, tu les traverses.</p>
+        <div class="calc"><div><label>Ta bankroll (FCFA)</label><input id="bk" type="number" value="50000" step="1000"></div><div><label>Prudence</label><select id="bkPct"><option value="1">Prudent (1 %)</option><option value="2" selected>Normal (2 %)</option><option value="3">Maximum (3 %)</option></select></div><div class="out" id="bkOut"></div></div></div>
+      <div class="tip"><div class="num">3</div><h3>Les combinés : la cote monte, la chance baisse vite</h3>
+        <p>Les probabilités se multiplient, et la marge du bookmaker aussi. Garde les combinés pour de <b>petites mises</b>, avec <b>2 ou 3 matchs</b> maximum.</p>
+        <div class="tablewrap" style="margin-top:8px"><table><thead><tr><th>Matchs</th><th class="n">à 90 %</th><th class="n">à 80 %</th><th class="n">à 70 %</th></tr></thead><tbody id="cbMath"></tbody></table></div></div>
+      <div class="tip"><div class="num">4</div><h3>Comprendre une cote</h3>
+        <p>Probabilité annoncée par le bookmaker = 1 ÷ cote. La somme des trois issues 1N2 dépasse 100 % : l'écart est sa <b>marge</b>. Plus elle est faible, mieux tu es payé.</p>
+        <div class="calc"><div><label>Cote 1</label><input id="m1" type="number" step="0.01" value="1.80"></div><div><label>Cote N</label><input id="mN" type="number" step="0.01" value="3.50"></div><div><label>Cote 2</label><input id="m2" type="number" step="0.01" value="4.50"></div><div class="out" id="mOut"></div></div></div>
+      <div class="tip"><div class="num">5</div><h3>Avant de valider, vérifie ce que le modèle ne voit pas</h3>
+        <ul><li><b>Absences</b> : blessés, suspendus, joueurs clés au repos.</li><li><b>Enjeu</b> : titre, maintien, qualification… ou match sans intérêt.</li><li><b>Fatigue</b> : coupe d'Europe en milieu de semaine, long voyage.</li><li><b>Arbitre et météo</b> : terrain lourd, arbitre sévère sur les cartons.</li></ul>
+        <p style="margin-top:6px">Le modèle AZETO ne connaît pas ces infos : utilise le champ « Ajustement contexte » dans Analyser un match.</p></div>
+      <div class="tip"><div class="num">6</div><h3>Discipline : les erreurs qui coûtent cher</h3>
+        <ul><li>Ne cours jamais après tes pertes en doublant la mise.</li><li>Note chaque pari (date, cote, mise, résultat) pour connaître ton vrai bilan.</li><li>Fixe une limite par mois et respecte-la.</li><li>Méfie-toi des « coupons sûrs à 100 % » vendus sur les réseaux : ça n'existe pas.</li><li>Ne parie pas sous le coup de l'émotion, ni sur ton équipe de cœur.</li></ul></div>
+    </div>
+    <div class="card" style="margin-top:14px"><h2>Jeu responsable</h2><p class="note" style="font-size:.9em">Les paris sont interdits aux moins de 18 ans. Ne mise que de l'argent dont tu n'as pas besoin pour vivre. Si tu joues pour te refaire, si tu caches tes paris à tes proches ou si tu empruntes pour jouer, arrête et parles-en à quelqu'un de confiance. Aucun pronostic n'est garanti : AZETO donne des probabilités, pas des certitudes.</p></div>
+  </section>
+
   <!-- METHODE -->
   <section id="tab-methode" class="hidden" style="--accent:#94a3b8">
     <div class="page-hero"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg></div><div><div class="eyebrow">Infos</div><h1>Méthode & fiabilité</h1><p>Comment sont calculées les probabilités, d'où viennent les données, et ce qu'il faut savoir avant de parier.</p></div></div>
@@ -350,14 +429,14 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
       <p class="note" id="srcNote"></p>
     </div>
   </section>
-  <div class="footer"><b>© 2026 Yves Sourou Koudjo · AZETO Pronos · Tous droits réservés.</b><br>Reproduction ou copie interdite sans autorisation.<br>Les probabilités sont des estimations statistiques, pas des certitudes · 18+ · Joue avec modération<br><span style="opacity:.7">Version du site : 08/11/2026 (nouveau design)</span></div>
+  <div class="footer"><b>© 2026 Yves Sourou Koudjo · AZETO Pronos · Tous droits réservés.</b><br>Reproduction ou copie interdite sans autorisation.<br>Les probabilités sont des estimations statistiques, pas des certitudes · 18+ · Joue avec modération<br><span style="opacity:.7">Version du site : 09/11/2026 (combiné + conseils)</span></div>
 </div></main>
 </div>
 <nav class="bottomnav" id="bottomnav">
   <a href="#accueil" data-tab="accueil"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg><span>Accueil</span></a>
   <a href="#selection" data-tab="selection"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg><span>Pronos</span></a>
   <a href="#match" data-tab="match"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg><span>Analyser</span></a>
-  <a href="#nations" data-tab="nations"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18"/></svg><span>Sélections</span></a>
+  <a href="#combine" data-tab="combine"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><span>Combiné</span></a>
   <a href="#" id="bnMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg><span>Menu</span></a>
 </nav>
 
@@ -657,6 +736,7 @@ function init(){
   setupAC('eH','eHl','eHs'); setupAC('eA','eAl','eAs');
   buildUpcoming(D); $('selDays').onchange = drawSelection; $('selLg').onchange = drawSelection; drawSelection();
   initIntl(D);
+  initCombine(); initConseils();
   $('updChip').innerHTML = `<span class="dot"></span>Données du ${esc(D.maj)}`;
   const nT = Object.values(MODEL.teams).reduce((s,x) => s + x.length, 0);
   $('homeTiles').innerHTML = [[rows.filter(r => !r.tier).length.toLocaleString('fr-FR'), 'matchs de championnat analysés'], [leagues.length, 'championnats suivis'],
@@ -764,6 +844,7 @@ function render(title){
   const r = current;
   $('res').classList.remove('hidden');
   $('resTitle').textContent = title;
+  $('addCombo').textContent = '＋ Ajouter à mon combiné'; if (typeof initCombineBtn === 'function') initCombineBtn();
   $('kpis').innerHTML = [['Buts attendus dom.', f2(r.lh), 'var(--primary)'], ['Buts attendus ext.', f2(r.la), 'var(--secondary)'],
     ['Victoire dom. / Nul / Victoire ext.', `${pct(r.p1)} · ${pct(r.px)} · ${pct(r.p2)}`, 'var(--text)'], ['Total buts attendus', f2(r.lh+r.la), 'var(--warning)']]
     .map(([l,v,c]) => `<div class="kpi"><div class="v" style="color:${c};${v.length>12?'font-size:1em':''}">${v}</div><div class="l">${l}</div></div>`).join('');
@@ -853,9 +934,106 @@ function drawElo(){
   const l = ELO.filter(e => (c === 'Tous les pays' || e.ctry === c) && (!q || e.club.toLowerCase().includes(q))).slice(0, 300);
   $('eloT').querySelector('tbody').innerHTML = l.map(e => `<tr><td>${e.rank}</td><td><b>${esc(e.club)}</b></td><td>${esc(e.ctry)}</td><td>${esc(e.level)}</td><td class="n">${e.elo}</td><td class="n">${e.crank}</td></tr>`).join('') || '<tr><td colspan="6" class="note">Aucun club.</td></tr>';
 }
+
+/* ---------- mon combiné ---------- */
+let BASKET = [];                 // {key, title, sub, list:[[nom,p]], odds:{nom:cote}, names:[dom,ext]}
+const CB_KEY = 'azeto_combine_v1';
+function cbSave(){ try { localStorage.setItem(CB_KEY, JSON.stringify(BASKET.map(b => b.up ? {key:b.key, up:1} : b))); } catch(e){} }
+function cbLoad(){
+  try { const a = JSON.parse(localStorage.getItem(CB_KEY) || '[]');
+    BASKET = a.map(b => b.up ? cbFromUp(UPCOMING.find(u => upKey(u) === b.key)) : b).filter(Boolean); } catch(e){ BASKET = []; }
+}
+const upKey = u => u.lg + '|' + u.H.name + '|' + u.A.name;
+const dstrU = u => u.date.toLocaleDateString('fr-FR', {weekday:'short', day:'2-digit', month:'2-digit'}) + (u.time ? ' ' + u.time : '');
+function cbFromUp(u){
+  if (!u) return null;
+  const odds = {}; for (const c of u.cands) if (c.o) odds[c.nm] = c.o;
+  return {key: upKey(u), up: 1, title: `${u.H.name} – ${u.A.name}`, sub: `${dstrU(u)} · ${u.lg}`, list: u.r.list, odds, names: [u.H.name, u.A.name], weak: u.n < 15};
+}
+function nice(nm, [h, a]){
+  return nm.startsWith('1 -') ? `Victoire ${h}` : nm.startsWith('2 -') ? `Victoire ${a}` : nm.startsWith('N -') ? 'Match nul'
+    : nm.startsWith('1N') ? `${h} ou nul` : nm.startsWith('N2') ? `${a} ou nul` : nm.startsWith('12') ? `${h} ou ${a} (pas de nul)` : nm;
+}
+function legFor(b, mode){
+  const c = b.list.map(([nm,p]) => ({nm, p})).filter(x => recoGroup(x.nm));
+  const inb = (lo, hi) => c.filter(x => x.p >= lo && x.p < hi).sort((x,y) => y.p - x.p)[0];
+  if (mode === 'S') return inb(0.70, 0.92) || c.filter(x => x.p < 0.92).sort((x,y) => y.p - x.p)[0];
+  if (mode === 'E') return inb(0.58, 0.75) || c.sort((x,y) => Math.abs(x.p - 0.68) - Math.abs(y.p - 0.68))[0];
+  const res = c.filter(x => /^(1|N|2) -/.test(x.nm)).sort((x,y) => y.p - x.p)[0];
+  return inb(0.40, 0.58) || res;
+}
+function drawCombine(){
+  // liste des matchs
+  const days = +$('cbDays').value, lgf = $('cbLg').value, q = $('cbQ').value.trim().toLowerCase();
+  const lim = new Date(); lim.setHours(0,0,0,0); lim.setDate(lim.getDate() + days);
+  const list = UPCOMING.filter(u => u.date <= lim && (lgf === 'Tous' || u.lg === lgf) && (!q || (u.H.name + ' ' + u.A.name).toLowerCase().includes(q)));
+  const inB = new Set(BASKET.map(b => b.key));
+  $('cbList').innerHTML = list.map(u => `<div class="pick${inB.has(upKey(u)) ? ' on' : ''}" data-k="${esc(upKey(u))}"><span class="ck">✓</span><div class="mt"><b>${esc(u.H.name)} – ${esc(u.A.name)}</b><small>${dstrU(u)} · ${esc(u.lg)}${u.n < 15 ? ' · promu (estimation)' : ''}</small></div><div class="pr">1 ${pct(u.r.p1)}<br>N ${pct(u.r.px)} · 2 ${pct(u.r.p2)}</div></div>`).join('') || '<p class="note" style="padding:14px">Aucun match pour ce filtre.</p>';
+  $('cbList').querySelectorAll('.pick').forEach(el => el.onclick = () => {
+    const k = el.dataset.k, i = BASKET.findIndex(b => b.key === k);
+    if (i >= 0) BASKET.splice(i, 1);
+    else { if (BASKET.length >= 8) { alert('8 matchs maximum : au-delà, un combiné n\'a presque plus de chance de passer.'); return; } BASKET.push(cbFromUp(UPCOMING.find(u => upKey(u) === k))); }
+    cbSave(); drawCombine();
+  });
+  // panier
+  $('cbCount').textContent = BASKET.length ? `(${BASKET.length} match${BASKET.length > 1 ? 's' : ''})` : '';
+  $('cbBasket').innerHTML = BASKET.map((b,i) => `<span class="bchip">${esc(b.title)}<button data-rm="${i}" aria-label="Retirer">×</button></span>`).join('') || '<p class="note">Ton panier est vide : coche au moins 2 matchs ci-dessus.</p>';
+  $('cbBasket').querySelectorAll('[data-rm]').forEach(x => x.onclick = () => { BASKET.splice(+x.dataset.rm, 1); cbSave(); drawCombine(); });
+  $('cbClear').classList.toggle('hidden', !BASKET.length);
+  // combinés
+  if (BASKET.length < 2) { $('cbOut').innerHTML = '<p class="note">Ajoute au moins 2 matchs pour voir les combinés proposés.</p>'; return; }
+  const modes = [['S','Combiné sécurité','var(--success)','Le pari le plus sûr sur chaque match.'], ['E','Combiné équilibré','var(--gold)','Un bon compromis entre risque et gain.'], ['A','Combiné audacieux','var(--red)','Cote plus forte, mais risque élevé.']];
+  $('cbOut').innerHTML = '<div class="combos">' + modes.map(([m, nm, col, txt]) => {
+    const legs = BASKET.map(b => ({b, x: legFor(b, m)})).filter(l => l.x);
+    const pr = legs.reduce((s,l) => s * l.x.p, 1), allOdds = legs.every(l => l.b.odds && l.b.odds[l.x.nm]);
+    const O = allOdds ? legs.reduce((s,l) => s * l.b.odds[l.x.nm], 1) : null, need = Math.max(P.cmin, (1 + P.evmin)/pr);
+    const verdict = O ? (pr*O - 1 >= P.evmin ? `<span class="tag value">VALUE +${((pr*O-1)*100).toFixed(1).replace('.',',')} %</span>` : '<span class="tag no">Cote du marché trop basse</span>') : '';
+    return `<div class="combo" style="--c:${col}"><div class="k">${nm}</div><div class="rate">${pct(pr)}</div><div class="sub">Taux de réussite estimé · environ ${Math.round(pr*100)} combinés sur 100 passent</div>
+      <div class="gauge"><i style="width:${Math.max(2, pr*100)}%"></i></div>
+      ${legs.map(l => `<div class="leg"><div><b>${esc(nice(l.x.nm, l.b.names))}</b><small>${esc(l.b.title)}${l.b.weak ? ' · estimation' : ''}</small></div><div class="lp">${pct(l.x.p)}<br><small>cote juste ${f2(1/l.x.p)}${l.b.odds && l.b.odds[l.x.nm] ? ' · marché ' + f2(l.b.odds[l.x.nm]) : ''}</small></div></div>`).join('')}
+      <div class="odds"><div><b>${f2(1/pr)}</b><span>cote juste totale</span></div><div><b>≥ ${f2(need)}</b><span>cote minimale à exiger</span></div></div>
+      ${O ? `<p class="note" style="margin-top:8px">Cote du marché (moyenne bookmakers) : <b>${f2(O)}</b> ${verdict}</p>` : ''}
+      <p class="note" style="margin-top:8px">${txt}</p></div>`;
+  }).join('') + '</div>'
+  + `<div class="scen${BASKET.length > 3 ? ' danger' : ''}" style="margin-top:14px">${BASKET.length > 3 ? `<b>Attention :</b> avec ${BASKET.length} matchs, même le combiné sécurité perd souvent. Notre conseil : 2 ou 3 matchs maximum.` : '<b>Conseil :</b> mise sur un combiné moins que sur un pari simple (0,5 à 1 % de ta bankroll).'} Joue-le seulement si la cote totale de ton bookmaker atteint la cote minimale indiquée. Le taux suppose que les matchs sont indépendants.</div>`;
+}
+function initCombine(){
+  const lgs = [...new Set(UPCOMING.map(u => u.lg))].sort();
+  $('cbLg').innerHTML = '<option>Tous</option>' + lgs.map(l => `<option>${esc(l)}</option>`).join('');
+  $('cbDays').onchange = drawCombine; $('cbLg').onchange = drawCombine; $('cbQ').oninput = drawCombine;
+  $('cbClear').onclick = () => { BASKET = []; cbSave(); drawCombine(); };
+  initCombineBtn();
+  cbLoad(); drawCombine();
+}
+function addToCombo(){
+    if (!current) return;
+    const odds = {}; document.querySelectorAll('#mk input.odd').forEach(x => { const v = parseFloat(String(x.value).replace(',','.')); if (v > 1) odds[current.list[+x.dataset.i][0]] = v; });
+    const t = $('resTitle').textContent, [title, ...rest] = t.split(' · ');
+    const key = 'manuel|' + title;
+    BASKET = BASKET.filter(b => b.key !== key);
+    if (BASKET.length >= 8) { alert('8 matchs maximum dans le panier.'); return; }
+    BASKET.push({key, title, sub: rest.join(' · '), list: current.list, odds, names: NAMES.slice()});
+    cbSave(); drawCombine();
+    $('addCombo').textContent = '✓ Ajouté — voir mon combiné'; $('addCombo').onclick = () => { location.hash = 'combine'; };
+  }
+function initCombineBtn(){ $('addCombo').onclick = addToCombo; }
+/* ---------- conseils : petits calculateurs ---------- */
+function initConseils(){
+  const num = id => parseFloat(String($(id).value).replace(',','.'));
+  const fcfa = x => Math.round(x).toLocaleString('fr-FR') + ' FCFA';
+  const k = () => { const p = num('kP')/100, o = num('kO'); if (!(p > 0 && o > 1)) { $('kOut').textContent = ''; return; }
+    const ev = p*o - 1; $('kOut').innerHTML = `Gain moyen par pari : <b style="color:${ev >= 0 ? 'var(--success)' : 'var(--red)'}">${ev >= 0 ? '+' : ''}${(ev*100).toFixed(1).replace('.',',')} %</b> · cote minimale pour ${Math.round(p*100)} % : ${f2(1/p)}${ev >= P.evmin ? ' → pari intéressant' : ' → à éviter'}`; };
+  const bk = () => { const b = num('bk'), r = +$('bkPct').value/100; $('bkOut').innerHTML = b > 0 ? `Mise conseillée : <b>${fcfa(b*r)}</b> par pari simple · ${fcfa(b*r/2)} sur un combiné` : ''; };
+  const mg = () => { const o = ['m1','mN','m2'].map(num); if (o.some(x => !(x > 1))) { $('mOut').textContent = ''; return; }
+    const s = o.reduce((t,x) => t + 1/x, 0); $('mOut').innerHTML = `Marge du bookmaker : <b>${((s-1)*100).toFixed(1).replace('.',',')} %</b> · probabilités réelles annoncées : ${o.map(x => pct(1/x/s)).join(' / ')}`; };
+  ['kP','kO'].forEach(i => $(i).oninput = k); $('bk').oninput = bk; $('bkPct').onchange = bk; ['m1','mN','m2'].forEach(i => $(i).oninput = mg);
+  k(); bk(); mg();
+  $('cbMath').innerHTML = [1,2,3,4,5,6].map(n => `<tr><td>${n} match${n > 1 ? 's' : ''}</td>${[0.9,0.8,0.7].map(p => `<td class="n">${Math.round(p**n*100)} %</td>`).join('')}</tr>`).join('');
+}
+
 /* ---------- navigation (une page par fonctionnalité) ---------- */
-const PAGES = ['accueil','selection','match','ligue','europe','nations','methode'];
-const TITLES = {accueil:'Accueil', selection:'Pronos du jour', match:'Analyser un match', ligue:'Championnats', europe:'Clubs européens', nations:'Sélections nationales', methode:'Méthode'};
+const PAGES = ['accueil','selection','match','combine','ligue','europe','nations','conseils','methode'];
+const TITLES = {accueil:'Accueil', selection:'Pronos du jour', match:'Analyser un match', ligue:'Championnats', europe:'Clubs européens', nations:'Sélections nationales', methode:'Méthode', combine:'Mon combiné', conseils:'Conseils paris'};
 function go(page, scroll = true){
   if (!PAGES.includes(page)) page = 'accueil';
   PAGES.forEach(t => $('tab-'+t).classList.toggle('hidden', t !== page));
