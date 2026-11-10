@@ -1,0 +1,24 @@
+name: Historique pour le test de rentabilité
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  hist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          mkdir -p data/hist
+          for s in 2223 2324 2425; do
+            for l in E0 SP1 F1 I1 D1 B1 T1 SC0 G1 N1 P1; do
+              curl -sSfL --retry 3 -A "Mozilla/5.0 (AZETO Pronos backtest)" -o "data/hist/${s}_${l}.csv" "https://www.football-data.co.uk/mmz4281/${s}/${l}.csv" || echo "ECHEC ${s}_${l}"
+            done
+          done
+          ls -la data/hist | head -50
+      - run: |
+          git config user.name "azeto-bot"
+          git config user.email "azeto-bot@users.noreply.github.com"
+          git add data/hist
+          git diff --cached --quiet || git commit -m "Historique 2022-2025 pour le test de rentabilité"
+          git push
