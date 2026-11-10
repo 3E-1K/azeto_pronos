@@ -261,7 +261,7 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
     <div class="page-hero"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></div><div><div class="eyebrow">Pronos du jour</div><h1>Les paris les plus solides</h1><p>Sélection automatique sur les prochains matchs : probabilité entre 75 et 92 %, tirée des cotes du marché quand elles existent, avec la cote minimale à exiger.</p></div></div>
     <div class="card">
       <h2>Les 3 paris les plus solides</h2>
-      <div class="grid2"><div><label>Période</label><select id="selDays"><option value="3">3 prochains jours</option><option value="7" selected>7 prochains jours</option><option value="10">10 prochains jours</option></select></div>
+      <div class="grid2"><div><label>Période</label><select id="selDays"><option value="1">24 prochaines heures</option><option value="3">3 prochains jours</option><option value="7" selected>7 prochains jours</option><option value="10">10 prochains jours</option><option value="0">Tous les matchs connus</option></select></div>
       <div><label>Championnat</label><select id="selLg"><option>Tous</option></select></div></div>
       <div id="selPicks" style="margin-top:12px"></div>
       <p class="note" style="margin-top:10px">Choix automatiques : probabilité entre 75 et 92 %, au moins 15 matchs de données pour chaque équipe, un seul pari par match. Les matchs dont les cotes sont déjà publiées passent en premier : leur probabilité vient du marché (plus fiable). Un choix dont la cote moyenne est sous 1,10 est écarté (gain trop faible pour le risque). « Cote juste » = cote sans marge ; « bonne cote » = 3 % au-dessus. Vérifie toujours les absences et la composition avant de jouer. Ne combine pas : 3 paris à 90 % ne passent ensemble que 73 % du temps.</p>
@@ -374,7 +374,7 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
     <div class="page-hero"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg></div><div><div class="eyebrow">Pronostics</div><h1>Mon combiné</h1><p>Choisis tes matchs : AZETO te propose 3 combinés (sécurité, équilibré, audacieux) avec le taux de réussite estimé et la cote minimale à exiger.</p></div></div>
     <div class="card">
       <h2>1. Choisis tes matchs</h2>
-      <div class="grid3"><div><label>Période</label><select id="cbDays"><option value="3">3 prochains jours</option><option value="7" selected>7 prochains jours</option><option value="10">10 prochains jours</option></select></div>
+      <div class="grid3"><div><label>Période</label><select id="cbDays"><option value="1">24 prochaines heures</option><option value="3">3 prochains jours</option><option value="7" selected>7 prochains jours</option><option value="10">10 prochains jours</option><option value="0">Tous les matchs connus</option></select></div>
         <div><label>Championnat</label><select id="cbLg"><option>Tous</option></select></div>
         <div><label>Rechercher une équipe</label><input id="cbQ" placeholder="ex. Arsenal"></div></div>
       <div class="pick-list" id="cbList" style="margin-top:12px"></div>
@@ -455,7 +455,7 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
       <p class="note" id="srcNote"></p>
     </div>
   </section>
-  <div class="footer"><b>© 2026 Yves Sourou Koudjo · AZETO Pronos · Tous droits réservés.</b><br>Reproduction ou copie interdite sans autorisation.<br>Les probabilités sont des estimations statistiques, pas des certitudes · 18+ · Joue avec modération<br><span style="opacity:.7">Version du site : 10/11/2026 (probabilités du marché + nos résultats)</span></div>
+  <div class="footer"><b>© 2026 Yves Sourou Koudjo · AZETO Pronos · Tous droits réservés.</b><br>Reproduction ou copie interdite sans autorisation.<br>Les probabilités sont des estimations statistiques, pas des certitudes · 18+ · Joue avec modération<br><span style="opacity:.7">Version du site : 10/11/2026 (combiné : filtres 24 h et championnats)</span></div>
 </div></main>
 </div>
 <nav class="bottomnav" id="bottomnav">
@@ -760,11 +760,25 @@ function winOf(nm, hg, ag){
 }
 /* MODELE-FIN */
 let UPCOMING = [];
+function kickoff(u){ const d = new Date(u.date); const m = /^(\d{1,2}):(\d{2})/.exec(u.time || ''); if (m) d.setHours(+m[1], +m[2]); else d.setHours(23, 59); return d; }
+function inPeriod(u, days){   // 1 = 24 h glissantes, 0 = tous les matchs connus
+  if (!days) return true;
+  if (days === 1) return kickoff(u) <= new Date(Date.now() + 86400e3);
+  const lim = new Date(); lim.setHours(0,0,0,0); lim.setDate(lim.getDate() + days); return u.date <= lim;
+}
+const ALL_LG = () => Object.keys(MAIN).map(k => MAIN[k]).concat(Object.keys(NEW).map(k => NEW[k])).filter(l => MODEL.teams[l]).sort((a,b) => a.localeCompare(b,'fr'));
+function lgOptions(){
+  const n = {}; for (const u of UPCOMING) n[u.lg] = (n[u.lg] || 0) + 1;
+  return '<option value="Tous">Tous les championnats</option>' + ALL_LG().map(l => `<option value="${esc(l)}">${esc(l)} (${n[l] ? n[l] + ' match' + (n[l] > 1 ? 's' : '') : 'aucun match'})</option>`).join('');
+}
+function nextMsg(lgf){
+  const L = UPCOMING.filter(u => lgf === 'Tous' || u.lg === lgf);
+  return L.length ? ` Prochain match connu : <b>${dstrU(L[0])}</b> (${esc(L[0].H.name)} – ${esc(L[0].A.name)}). Choisis « Tous les matchs connus » pour le voir.` : ' Aucun match annoncé pour l\'instant (trêve ou fin de saison). Le calendrier se met à jour chaque matin.';
+}
 function buildUpcoming(D){
   const today = new Date(); today.setHours(0,0,0,0);
   UPCOMING = computeUpcoming(D, MODEL, today);
-  const lgs = [...new Set(UPCOMING.map(u => u.lg))].sort();
-  $('selLg').innerHTML = '<option>Tous</option>' + lgs.map(l => `<option>${esc(l)}</option>`).join('');
+  $('selLg').innerHTML = lgOptions();
 }
 const srcTag = u => u.src === 'marché' ? '<span class="tag value" title="Probabilités tirées des cotes moyennes des bookmakers, marge retirée">proba marché</span>' : '<span class="tag weak" title="Pas encore de cotes : probabilités du modèle AZETO seul, moins fiables">modèle seul</span>';
 function oddLine(c){
@@ -773,11 +787,10 @@ function oddLine(c){
 }
 function drawSelection(){
   const days = +$('selDays').value, lgf = $('selLg').value;
-  const lim = new Date(); lim.setHours(0,0,0,0); lim.setDate(lim.getDate() + days);
-  const list = UPCOMING.filter(u => u.date <= lim && (lgf === 'Tous' || u.lg === lgf));
+  const list = UPCOMING.filter(u => inPeriod(u, days) && (lgf === 'Tous' || u.lg === lgf));
   const dstr = u => u.date.toLocaleDateString('fr-FR', {weekday:'short', day:'2-digit', month:'2-digit'}) + (u.time ? ' ' + u.time : '');
   const picks = pickSafe(list), top = picks.slice(0,3);
-  $('selPicks').innerHTML = !list.length ? '<p class="note">Aucun match à venir dans les données pour cette période. Les données se mettent à jour chaque matin.</p>'
+  $('selPicks').innerHTML = !list.length ? '<p class="note">Aucun match sur cette période.' + nextMsg(lgf) + '</p>'
     : !top.length ? '<p class="note">Aucun pari ne remplit les critères sur cette période : mieux vaut ne pas jouer.</p>'
     : '<div class="recos">' + top.map((x,i) => `<div class="rc t1"><div class="k">Choix ${i+1} · ${dstr(x.u)} · ${esc(x.u.lg)}</div><div class="m">${esc(x.u.H.name)} – ${esc(x.u.A.name)}</div><div style="font-size:1.05em;font-weight:bold;color:var(--success)">${x.c.nm}</div><div class="pp">${pct(x.c.p)}</div><div class="o">${oddLine(x.c)}</div><div class="note">${srcTag(x.u)} · buts attendus ${f2(x.u.r.lh)} – ${f2(x.u.r.la)}</div></div>`).join('') + '</div>'
       + (picks.length > 3 ? '<h3 style="margin-top:14px">En réserve</h3><div class="tablewrap"><table>' + picks.slice(3,8).map(x => `<tr><td>${dstr(x.u)}</td><td>${esc(x.u.H.name)} – ${esc(x.u.A.name)}</td><td>${x.c.nm}</td><td class="n">${pct(x.c.p)}</td><td class="n">bonne cote ≥ ${f2(minOdd(x.c.p))}</td><td>${srcTag(x.u)}</td></tr>`).join('') + '</table></div>' : '');
@@ -1067,10 +1080,11 @@ function legFor(b, mode){
 function drawCombine(){
   // liste des matchs
   const days = +$('cbDays').value, lgf = $('cbLg').value, q = $('cbQ').value.trim().toLowerCase();
-  const lim = new Date(); lim.setHours(0,0,0,0); lim.setDate(lim.getDate() + days);
-  const list = UPCOMING.filter(u => u.date <= lim && (lgf === 'Tous' || u.lg === lgf) && (!q || (u.H.name + ' ' + u.A.name).toLowerCase().includes(q)));
+  const nq = q ? normT(q) : '';
+  const hit = u => !q || (u.H.name + ' ' + u.A.name).toLowerCase().includes(q) || (nq && (normT(u.H.name).includes(nq) || normT(u.A.name).includes(nq)));
+  const list = UPCOMING.filter(u => inPeriod(u, days) && (lgf === 'Tous' || u.lg === lgf) && hit(u));
   const inB = new Set(BASKET.map(b => b.key));
-  $('cbList').innerHTML = list.map(u => `<div class="pick${inB.has(upKey(u)) ? ' on' : ''}" data-k="${esc(upKey(u))}"><span class="ck">✓</span><div class="mt"><b>${esc(u.H.name)} – ${esc(u.A.name)}</b><small>${dstrU(u)} · ${esc(u.lg)}${u.n < 15 ? ' · promu (estimation)' : ''}</small></div><div class="pr">1 ${pct(u.r.p1)}<br>N ${pct(u.r.px)} · 2 ${pct(u.r.p2)}</div></div>`).join('') || '<p class="note" style="padding:14px">Aucun match pour ce filtre.</p>';
+  $('cbList').innerHTML = list.map(u => `<div class="pick${inB.has(upKey(u)) ? ' on' : ''}" data-k="${esc(upKey(u))}"><span class="ck">✓</span><div class="mt"><b>${esc(u.H.name)} – ${esc(u.A.name)}</b><small>${dstrU(u)} · ${esc(u.lg)}${u.n < 15 ? ' · promu (estimation)' : ''}</small></div><div class="pr">1 ${pct(u.r.p1)}<br>N ${pct(u.r.px)} · 2 ${pct(u.r.p2)}</div></div>`).join('') || '<p class="note" style="padding:14px">' + (q ? (UPCOMING.some(hit) ? `Le prochain match de « ${esc(q)} » est hors de la période choisie : prends « Tous les matchs connus ».` : `Aucun match annoncé pour « ${esc(q)} » pour l'instant. Tu peux quand même l'ajouter : va dans <a href="#match">Analyser un match</a>, choisis les deux équipes, puis « Ajouter à mon combiné ».`) : 'Aucun match sur cette période.' + nextMsg(lgf)) + '</p>';
   $('cbList').querySelectorAll('.pick').forEach(el => el.onclick = () => {
     const k = el.dataset.k, i = BASKET.findIndex(b => b.key === k);
     if (i >= 0) BASKET.splice(i, 1);
@@ -1100,8 +1114,7 @@ function drawCombine(){
   + `<div class="scen${BASKET.length > 3 ? ' danger' : ''}" style="margin-top:14px">${BASKET.length > 3 ? `<b>Attention :</b> avec ${BASKET.length} matchs, même le combiné sécurité perd souvent. Notre conseil : 2 ou 3 matchs maximum.` : '<b>Conseil :</b> mise sur un combiné moins que sur un pari simple (0,5 à 1 % de ta bankroll).'} Joue-le seulement si la cote totale de ton bookmaker atteint la cote minimale indiquée. Le taux suppose que les matchs sont indépendants.</div>`;
 }
 function initCombine(){
-  const lgs = [...new Set(UPCOMING.map(u => u.lg))].sort();
-  $('cbLg').innerHTML = '<option>Tous</option>' + lgs.map(l => `<option>${esc(l)}</option>`).join('');
+  $('cbLg').innerHTML = lgOptions();
   $('cbDays').onchange = drawCombine; $('cbLg').onchange = drawCombine; $('cbQ').oninput = drawCombine;
   $('cbClear').onclick = () => { BASKET = []; cbSave(); drawCombine(); };
   initCombineBtn();
