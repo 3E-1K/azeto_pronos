@@ -1,8 +1,8 @@
 // Rejoue le modèle AZETO match par match (sans connaître l'avenir) et enregistre probabilités + cotes.
 import fs from 'node:fs';
 const REPO = process.argv[2], OUT = process.argv[3];
-const html = fs.readFileSync(REPO + '/index.html', 'utf8').split('\n');
-const code = html.slice(445, 634).join('\n');   // de « const P = » jusqu'à la fin de markets()
+const html = fs.readFileSync(REPO + '/index.html', 'utf8');
+const code = html.slice(html.indexOf('/* MODELE-DEBUT'), html.indexOf('/* MODELE-FIN */'));   // code pur partagé avec la page
 const M = new Function(code + '\nreturn {P, MAIN, NEW, DIV2, parseCSV, parseDate, loadMatches, buildModel, markets};')();
 
 // --- fichiers ---

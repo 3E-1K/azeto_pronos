@@ -19,6 +19,8 @@ jobs:
           node-version: "20"
       - name: Télécharger et calculer les données
         run: node scripts/update.mjs
+      - name: Journal des pronos publiés (Nos résultats)
+        run: node scripts/journal.mjs
       - name: Enregistrer les nouvelles données
         run: |
           git config user.name "azeto-bot"
