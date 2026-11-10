@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="logo.svg">
+<link rel="icon" type="image/png" sizes="512x512" href="logo-512.png">
+<link rel="apple-touch-icon" href="logo-180.png">
 <title>AZETO Pronos</title>
 <meta name="author" content="Yves Sourou Koudjo">
 <meta name="copyright" content="© 2026 Yves Sourou Koudjo. Tous droits réservés.">
@@ -28,7 +31,7 @@ a{color:inherit;text-decoration:none}
 /* barre du haut */
 .topbar{position:sticky;top:0;z-index:40;height:62px;display:flex;align-items:center;gap:12px;padding:0 18px;background:rgba(10,16,32,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
 .brand{display:flex;align-items:center;gap:10px;font-family:'Barlow Condensed',Inter,sans-serif;font-weight:800;font-size:1.45em;letter-spacing:.04em}
-.brand .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--brand),#0b7d55);display:grid;place-items:center;box-shadow:0 0 0 1px rgba(255,255,255,.08) inset}
+.brand .logo{width:38px;height:38px;display:grid;place-items:center}.brand .logo img{width:38px;height:38px;display:block}
 .brand b{color:var(--brand)}
 .topbar .sp{flex:1}
 .chip{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;font-size:.78em;font-weight:600;background:var(--surface2);border:1px solid var(--line);color:var(--muted)}
@@ -202,7 +205,7 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
 <body>
 <header class="topbar">
   <button class="burger" id="burger" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg></button>
-  <a class="brand" href="#accueil"><span class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" width="20" height="20" style="color:#04130c"><circle cx="12" cy="12" r="9"/><path d="M12 7l4 3-1.5 4.5h-5L8 10z"/><path d="M12 3v4M21 10l-5 0M18 19l-3.5-4.5M6 19l3.5-4.5M3 10h5"/></svg></span><span>AZETO <b>PRONOS</b></span></a>
+  <a class="brand" href="#accueil"><span class="logo"><img src="logo.svg" alt="AZETO Pronos"></span><span>AZETO <b>PRONOS</b></span></a>
   <span class="sp"></span>
   <span class="chip" id="updChip"><span class="dot"></span>Chargement…</span>
 </header>
@@ -455,7 +458,7 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
       <p class="note" id="srcNote"></p>
     </div>
   </section>
-  <div class="footer"><b>© 2026 Yves Sourou Koudjo · AZETO Pronos · Tous droits réservés.</b><br>Reproduction ou copie interdite sans autorisation.<br>Les probabilités sont des estimations statistiques, pas des certitudes · 18+ · Joue avec modération<br><span style="opacity:.7">Version du site : 10/11/2026 (combiné : filtres 24 h et championnats)</span></div>
+  <div class="footer"><b>© 2026 Yves Sourou Koudjo · AZETO Pronos · Tous droits réservés.</b><br>Reproduction ou copie interdite sans autorisation.<br>Les probabilités sont des estimations statistiques, pas des certitudes · 18+ · Joue avec modération<br><span style="opacity:.7">Version du site : 10/11/2026 (nouveau logo + combiné 24 h)</span></div>
 </div></main>
 </div>
 <nav class="bottomnav" id="bottomnav">
