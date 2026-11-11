@@ -108,21 +108,30 @@ let intl_fix = [];
 {
   const ymd = d => `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}`;
   const end = new Date(now.getTime() + 10 * 86400e3), seen = new Set();
+  const UA = { headers: { 'User-Agent': 'Mozilla/5.0 (AZETO Pronos data update)', 'Accept': 'application/json' } };
+  const base = slug => `https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/scoreboard`;
+  const take = (j, comp) => { let n = 0;
+    for (const e of j.events || []) {
+      const c = e.competitions && e.competitions[0]; if (!c || !c.competitors) continue;
+      const st = (c.status || e.status || {}).type || {}; if (st.state && st.state !== 'pre') continue;
+      const h = c.competitors.find(x => x.homeAway === 'home'), a = c.competitors.find(x => x.homeAway === 'away'); if (!h || !a) continue;
+      const t = new Date(new Date(e.date).getTime() + 3600e3);      // heure du Bénin
+      if (t < now || t > end) continue;
+      const m = { date: t.toISOString().slice(0, 10), time: t.toISOString().slice(11, 16), comp, h: h.team.displayName || h.team.name, a: a.team.displayName || a.team.name, neutral: !!c.neutralSite };
+      const k = m.date + m.h + m.a; if (seen.has(k)) continue; seen.add(k); intl_fix.push(m); n++;
+    } return n; };
+  let firstErr = true;
   for (const [slug, comp] of Object.entries(INTL_COMP)) {
-    try {
-      const r = await fetch(`https://site.api.espn.com/apis/site/v2/sports/soccer/${slug}/scoreboard?dates=${ymd(now)}-${ymd(end)}&limit=300`, { headers: { 'User-Agent': 'Mozilla/5.0 (AZETO Pronos data update)' } });
-      if (!r.ok) { console.log(`Sélections ${slug} : HTTP ${r.status}`); continue; }
-      const j = await r.json(); let n = 0;
-      for (const e of j.events || []) {
-        const c = e.competitions && e.competitions[0]; if (!c) continue;
-        const st = (c.status || e.status || {}).type || {}; if (st.state && st.state !== 'pre') continue;
-        const h = c.competitors.find(x => x.homeAway === 'home'), a = c.competitors.find(x => x.homeAway === 'away'); if (!h || !a) continue;
-        const t = new Date(new Date(e.date).getTime() + 3600e3);      // heure du Bénin
-        const m = { date: t.toISOString().slice(0, 10), time: t.toISOString().slice(11, 16), comp, h: h.team.displayName || h.team.name, a: a.team.displayName || a.team.name, neutral: !!c.neutralSite };
-        const k = m.date + m.h + m.a; if (seen.has(k)) continue; seen.add(k); intl_fix.push(m); n++;
-      }
-      if (n) console.log(`Sélections ${slug} : ${n} matchs à venir`);
-    } catch (e) { console.log(`Sélections ${slug} : erreur ${e.message}`); }
+    let n = 0, ok = 0;
+    for (let d = 0; d <= 10; d++) {           // une requête par jour (les plages de dates sont refusées)
+      const day = new Date(now.getTime() + d * 86400e3);
+      try {
+        const r = await fetch(`${base(slug)}?dates=${ymd(day)}`, UA);
+        if (!r.ok) { if (firstErr) { console.log(`Sélections ${slug} : HTTP ${r.status} ${(await r.text()).slice(0, 200)}`); firstErr = false; } if (d === 0) break; continue; }
+        ok++; n += take(await r.json(), comp);
+      } catch (e) { console.log(`Sélections ${slug} : erreur ${e.message}`); break; }
+    }
+    console.log(`Sélections ${slug} : ${ok ? n + ' matchs à venir' : 'indisponible'}`);
   }
   intl_fix.sort((x, y) => (x.date + x.time).localeCompare(y.date + y.time));
   console.log(`Calendrier sélections : ${intl_fix.length} matchs`);
