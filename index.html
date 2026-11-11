@@ -264,7 +264,7 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
     <div class="page-hero"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></svg></div><div><div class="eyebrow">Pronos du jour</div><h1>Les paris les plus solides</h1><p>Sélection automatique sur les prochains matchs : probabilité entre 75 et 92 %, tirée des cotes du marché quand elles existent, avec la cote minimale à exiger.</p></div></div>
     <div class="card">
       <h2>Les 3 paris les plus solides</h2>
-      <div class="grid2"><div><label>Période</label><select id="selDays"><option value="1">24 prochaines heures</option><option value="3">3 prochains jours</option><option value="7" selected>7 prochains jours</option><option value="10">10 prochains jours</option><option value="0">Tous les matchs connus</option></select></div>
+      <div class="grid2"><div><label>Période</label><select id="selDays"><option value="1">24 h (aujourd'hui et demain)</option><option value="3">3 prochains jours</option><option value="7" selected>7 prochains jours</option><option value="10">10 prochains jours</option><option value="0">Tous les matchs connus</option></select></div>
       <div><label>Championnat</label><select id="selLg"><option>Tous</option></select></div></div>
       <div id="selPicks" style="margin-top:12px"></div>
       <p class="note" style="margin-top:10px">Choix automatiques : probabilité entre 75 et 92 %, au moins 15 matchs de données pour chaque équipe, un seul pari par match. Les matchs dont les cotes sont déjà publiées passent en premier : leur probabilité vient du marché (plus fiable). Un choix dont la cote moyenne est sous 1,10 est écarté (gain trop faible pour le risque). « Cote juste » = cote sans marge ; « bonne cote » = 3 % au-dessus. Vérifie toujours les absences et la composition avant de jouer. Ne combine pas : 3 paris à 90 % ne passent ensemble que 73 % du temps.</p>
@@ -377,7 +377,7 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
     <div class="page-hero"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" ><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg></div><div><div class="eyebrow">Pronostics</div><h1>Mon combiné</h1><p>Choisis tes matchs : AZETO te propose 3 combinés (sécurité, équilibré, audacieux) avec le taux de réussite estimé et la cote minimale à exiger.</p></div></div>
     <div class="card">
       <h2>1. Choisis tes matchs</h2>
-      <div class="grid3"><div><label>Période</label><select id="cbDays"><option value="1">24 prochaines heures</option><option value="3">3 prochains jours</option><option value="7" selected>7 prochains jours</option><option value="10">10 prochains jours</option><option value="0">Tous les matchs connus</option></select></div>
+      <div class="grid3"><div><label>Période</label><select id="cbDays"><option value="1">24 h (aujourd'hui et demain)</option><option value="3">3 prochains jours</option><option value="7" selected>7 prochains jours</option><option value="10">10 prochains jours</option><option value="0">Tous les matchs connus</option></select></div>
         <div><label>Championnat</label><select id="cbLg"><option>Tous</option></select></div>
         <div><label>Rechercher une équipe</label><input id="cbQ" placeholder="ex. Arsenal"></div></div>
       <div class="pick-list" id="cbList" style="margin-top:12px"></div>
@@ -458,7 +458,7 @@ tr.safe td:first-child{box-shadow:inset 3px 0 0 var(--brand)}
       <p class="note" id="srcNote"></p>
     </div>
   </section>
-  <div class="footer"><b>© 2026 Yves Sourou Koudjo · AZETO Pronos · Tous droits réservés.</b><br>Reproduction ou copie interdite sans autorisation.<br>Les probabilités sont des estimations statistiques, pas des certitudes · 18+ · Joue avec modération<br><span style="opacity:.7">Version du site : 10/11/2026 (nouveau logo + combiné 24 h)</span></div>
+  <div class="footer"><b>© 2026 Yves Sourou Koudjo · AZETO Pronos · Tous droits réservés.</b><br>Reproduction ou copie interdite sans autorisation.<br>Les probabilités sont des estimations statistiques, pas des certitudes · 18+ · Joue avec modération<br><span style="opacity:.7">Version du site : 11/11/2026 (matchs des sélections dans le combiné)</span></div>
 </div></main>
 </div>
 <nav class="bottomnav" id="bottomnav">
@@ -764,15 +764,15 @@ function winOf(nm, hg, ag){
 /* MODELE-FIN */
 let UPCOMING = [];
 function kickoff(u){ const d = new Date(u.date); const m = /^(\d{1,2}):(\d{2})/.exec(u.time || ''); if (m) d.setHours(+m[1], +m[2]); else d.setHours(23, 59); return d; }
-function inPeriod(u, days){   // 1 = 24 h glissantes, 0 = tous les matchs connus
+function inPeriod(u, days){   // 1 = aujourd'hui et demain, 0 = tous les matchs connus
   if (!days) return true;
-  if (days === 1) return kickoff(u) <= new Date(Date.now() + 86400e3);
   const lim = new Date(); lim.setHours(0,0,0,0); lim.setDate(lim.getDate() + days); return u.date <= lim;
 }
 const ALL_LG = () => Object.keys(MAIN).map(k => MAIN[k]).concat(Object.keys(NEW).map(k => NEW[k])).filter(l => MODEL.teams[l]).sort((a,b) => a.localeCompare(b,'fr'));
 function lgOptions(){
   const n = {}; for (const u of UPCOMING) n[u.lg] = (n[u.lg] || 0) + 1;
-  return '<option value="Tous">Tous les championnats</option>' + ALL_LG().map(l => `<option value="${esc(l)}">${esc(l)} (${n[l] ? n[l] + ' match' + (n[l] > 1 ? 's' : '') : 'aucun match'})</option>`).join('');
+  const nat = [...new Set(UPCOMING.filter(u => u.nat).map(u => u.lg))].sort((a,b) => a.localeCompare(b,'fr'));
+  return '<option value="Tous">Tous les championnats</option>' + nat.map(l => `<option value="${esc(l)}">🌍 ${esc(l)} (${n[l]} match${n[l] > 1 ? 's' : ''})</option>`).join('') + ALL_LG().map(l => `<option value="${esc(l)}">${esc(l)} (${n[l] ? n[l] + ' match' + (n[l] > 1 ? 's' : '') : 'aucun match'})</option>`).join('');
 }
 function nextMsg(lgf){
   const L = UPCOMING.filter(u => lgf === 'Tous' || u.lg === lgf);
@@ -781,9 +781,10 @@ function nextMsg(lgf){
 function buildUpcoming(D){
   const today = new Date(); today.setHours(0,0,0,0);
   UPCOMING = computeUpcoming(D, MODEL, today);
+  addIntlUpcoming(D);
   $('selLg').innerHTML = lgOptions();
 }
-const srcTag = u => u.src === 'marché' ? '<span class="tag value" title="Probabilités tirées des cotes moyennes des bookmakers, marge retirée">proba marché</span>' : '<span class="tag weak" title="Pas encore de cotes : probabilités du modèle AZETO seul, moins fiables">modèle seul</span>';
+const srcTag = u => u.src === 'elo' ? '<span class="tag weak" title="Sélections nationales : probabilités du modèle Elo AZETO (test 2024-2026 : 83 % annoncé, 82 % réussi)">modèle Elo</span>' : u.src === 'marché' ? '<span class="tag value" title="Probabilités tirées des cotes moyennes des bookmakers, marge retirée">proba marché</span>' : '<span class="tag weak" title="Pas encore de cotes : probabilités du modèle AZETO seul, moins fiables">modèle seul</span>';
 function oddLine(c){
   const juste = 1/c.p, bonne = minOdd(c.p);
   return `Cote juste <b>${f2(juste)}</b> · bonne cote dès <b>${f2(bonne)}</b>` + (c.o ? `<br><span class="note">Moyenne des bookmakers : ${f2(c.o)}${c.o < juste ? ' (sous la cote juste : cherche mieux)' : ''}</span>` : '');
@@ -829,7 +830,33 @@ function drawResultats(){
   $('rsT').querySelector('tbody').innerHTML = rows.map(x => `<tr><td>${esc(x.date.split('-').reverse().join('/'))}</td><td><b>${esc(x.h)} – ${esc(x.a)}</b><br><small class="note">${esc(x.lg)}</small></td><td>${esc(x.pari)}</td><td class="n">${pct(x.p)}</td><td class="n">${x.coteMarche ? f2(x.coteMarche) : '—'}</td><td class="n">${x.score || ''}</td><td>${st(x)}</td></tr>`).join('')
     || '<tr><td colspan="7" class="note">Le journal démarre : les premiers pronos publiés apparaîtront après la prochaine mise à jour quotidienne.</td></tr>';
 }
+/* ---------- matchs à venir des sélections nationales (calendrier ESPN + Elo AZETO) ---------- */
+const INTL_ALIAS = {'Czechia':'Czech Republic','Türkiye':'Turkey','Turkiye':'Turkey','Bosnia-Herzegovina':'Bosnia and Herzegovina','Ireland':'Republic of Ireland','Rep. of Ireland':'Republic of Ireland','USA':'United States',"Côte d'Ivoire":'Ivory Coast',"Cote d'Ivoire":'Ivory Coast','Cape Verde Islands':'Cape Verde','Cabo Verde':'Cape Verde','Congo DR':'DR Congo','Democratic Republic of the Congo':'DR Congo','Korea Republic':'South Korea','Korea DPR':'North Korea','Kyrgyz Republic':'Kyrgyzstan','Chinese Taipei':'Taiwan','IR Iran':'Iran','China PR':'China','The Gambia':'Gambia','Swaziland':'Eswatini','Sao Tome and Principe':'São Tomé and Príncipe','Curacao':'Curaçao','St. Kitts and Nevis':'Saint Kitts and Nevis','St. Lucia':'Saint Lucia','St. Vincent and the Grenadines':'Saint Vincent and the Grenadines'};
+function findNat(name){
+  const T = INTL.teams, n = INTL_ALIAS[name] || name;
+  const t = T.find(t => t.n === n) || T.find(t => t.fr === name); if (t) return t;
+  const k = normT(n); return T.find(t => normT(t.n) === k || normT(t.fr) === k) || null;
+}
+function addIntlUpcoming(D){
+  if (!INTL || !INTL.teams || !D.intl_fix) return;
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (const f of D.intl_fix) {
+    const date = new Date(f.date + 'T00:00:00'); if (date < today) continue;
+    const H = findNat(f.h), A = findNat(f.a); if (!H || !A || H === A) continue;
+    const [lh, la] = intlLambdas(H.elo, A.elo, f.neutral, f.comp === 'Match amical'), r = markets(lh, la);
+    UPCOMING.push({lg: f.comp, date, time: f.time, H: {name: H.fr, idx: INTL.teams.indexOf(H)}, A: {name: A.fr, idx: INTL.teams.indexOf(A)}, n: 99, src: 'elo', nat: true, neutral: f.neutral,
+      r, rModel: r, odds: null, cands: r.list.map(([nm,p]) => ({nm, p, o: null, ev: null, g: recoGroup(nm)}))});
+  }
+  UPCOMING.sort((x,y) => kickoff(x) - kickoff(y) || x.lg.localeCompare(y.lg));
+}
+const NCOMP = c => /^Ligue des nations/.test(c) ? 'Ligue des nations' : c === 'Match amical' ? 'Match amical' : c === 'Qualif. CAN' ? 'Qualifications CAN' : /^Coupe d'Afrique/.test(c) ? 'CAN (phase finale)' : /^Qualif\. Coupe du monde/.test(c) ? 'Qualifications Coupe du monde' : c === 'Qualif. Euro' ? 'Qualifications Euro' : c === 'Coupe du monde' ? 'Coupe du monde (phase finale)' : c === 'Euro' ? 'Euro (phase finale)' : c === "Coupe d'Asie" ? "Coupe d'Asie" : c === 'Copa América' ? 'Copa América' : 'Match amical';
 function openMatch(u){
+  if (u.nat) {
+    if (location.hash !== '#match') location.hash = 'match'; go('match'); setMode('N');
+    $('nH').value = u.H.idx; $('nA').value = u.A.idx; $('nH').onchange(); $('nA').onchange();
+    $('nComp').value = NCOMP(u.lg); $('nNeutral').checked = !!u.neutral;
+    analyse(); return;
+  }
   if (location.hash !== '#match') location.hash = 'match'; go('match'); setMode('L');
   $('lgSel').value = u.lg; fillTeams(); $('hSel').value = u.H.name; $('aSel').value = u.A.name; showTeam('h'); showTeam('a');
   analyse();
@@ -857,8 +884,8 @@ function init(){
   $('ctrySel').innerHTML = '<option>Tous les pays</option>' + ctries.map(c => `<option>${esc(c)}</option>`).join('');
   $('ctrySel').onchange = drawElo; $('eloSearch').oninput = drawElo; drawElo();
   setupAC('eH','eHl','eHs'); setupAC('eA','eAl','eAs');
-  buildUpcoming(D); $('selDays').onchange = drawSelection; $('selLg').onchange = drawSelection; drawSelection();
   initIntl(D);
+  buildUpcoming(D); $('selDays').onchange = drawSelection; $('selLg').onchange = drawSelection; drawSelection();
   initCombine(); initConseils();
   $('updChip').innerHTML = `<span class="dot"></span>Données du ${esc(D.maj)}`;
   const nT = Object.values(MODEL.teams).reduce((s,x) => s + x.length, 0);
