@@ -1,1 +1,1 @@
-window.AZ_JOURNAL = {"maj":"2026-11-17","paris":[]};
+window.AZ_JOURNAL = {"maj":"2026-11-18","paris":[{"pub":"2026-11-18","date":"2026-11-20","heure":"20:30","lg":"Allemagne - Bundesliga","h":"Bayern Munich","a":"FC Koln","pari":"12 - Double chance","p":0.9078,"source":"modèle","coteJuste":1.1,"coteMarche":null,"statut":"en attente"},{"pub":"2026-11-18","date":"2026-11-20","heure":"20:45","lg":"France - Ligue 1","h":"Troyes","a":"Le Havre","pari":"Plus de 1,5 buts","p":0.7972,"source":"modèle","coteJuste":1.25,"coteMarche":null,"statut":"en attente"}]};
